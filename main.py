@@ -300,115 +300,26 @@ async def health_check():
 # Main routes
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    """Home page with beautiful template."""
     try:
         from fastapi.templating import Jinja2Templates
         templates = Jinja2Templates(directory="templates")
         return templates.TemplateResponse("index.html", {"request": request})
     except Exception as e:
-        logger.warning(f"Template error: {e}")
-        return HTMLResponse("""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>🤖 AI News Digest</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; }
-                .container { text-align: center; margin-top: 50px; }
-                .hero { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; margin: 20px 0; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-                .button { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; display: inline-block; margin: 10px; font-weight: bold; transition: transform 0.3s; }
-                .button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-                .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 40px 0; }
-                .feature { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); }
-                .emoji { font-size: 3em; margin-bottom: 15px; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="hero">
-                    <h1>🤖 AI News Digest Platform</h1>
-                    <p style="font-size: 1.3em; margin: 20px 0;">Get personalized AI-curated news delivered to your inbox</p>
-                    <div class="features">
-                        <div class="feature">
-                            <div class="emoji">📰</div>
-                            <h3>Smart Curation</h3>
-                            <p>AI-powered news selection based on your interests</p>
-                        </div>
-                        <div class="feature">
-                            <div class="emoji">📧</div>
-                            <h3>Email Delivery</h3>
-                            <p>Daily digest delivered to your inbox</p>
-                        </div>
-                        <div class="feature">
-                            <div class="emoji">⚙️</div>
-                            <h3>Customizable</h3>
-                            <p>Choose your topics and delivery preferences</p>
-                        </div>
-                    </div>
-                    <a href="/subscribe" class="button">🚀 Subscribe Now</a>
-                    <a href="/admin/login" class="button">🔐 Admin Login</a>
-                    <a href="/contact" class="button">📞 Contact Us</a>
-                </div>
-            </div>
-        </body>
-        </html>
-        """)
+        logger.error(f"Template error: {e}")
+        # Minimal fallback only if templates completely fail
+        raise HTTPException(status_code=500, detail="Template service unavailable")
 
 @app.get("/subscribe", response_class=HTMLResponse)
 async def subscribe_page(request: Request):
+    """Subscribe page with beautiful template."""
     try:
         from fastapi.templating import Jinja2Templates
         templates = Jinja2Templates(directory="templates")
         return templates.TemplateResponse("subscribe.html", {"request": request})
-    except Exception:
-        return HTMLResponse("""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Subscribe - AI News Digest</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body { font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; }
-                .form-container { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); }
-                .form-group { margin: 20px 0; }
-                label { display: block; margin-bottom: 8px; font-weight: bold; }
-                input, select, textarea { width: 100%; padding: 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.9); color: #333; }
-                button { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 15px 30px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
-            </style>
-        </head>
-        <body>
-            <div class="form-container">
-                <h1>📧 Subscribe to AI News Digest</h1>
-                <form method="post" action="/subscribe">
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="digest_type">Digest Type:</label>
-                        <select id="digest_type" name="digest_type">
-                            <option value="tech">Tech News</option>
-                            <option value="upsc">UPSC News</option>
-                            <option value="both">Both</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="preferences">Preferences:</label>
-                        <input type="text" id="preferences" name="preferences" placeholder="e.g., AI, Machine Learning, Web Development" value="all">
-                    </div>
-                    <button type="submit">🚀 Subscribe Now</button>
-                </form>
-                <p style="text-align: center; margin-top: 20px;">
-                    <a href="/" style="color: white;">← Back to Home</a>
-                </p>
-            </div>
-        </body>
-        </html>
-        """)
+    except Exception as e:
+        logger.error(f"Template error: {e}")
+        raise HTTPException(status_code=500, detail="Template service unavailable")
 
 @app.post("/subscribe", response_model=SubscriberResponse)
 def create_subscriber(subscriber: SubscriberCreate, db = Depends(get_db)):
@@ -483,55 +394,14 @@ def create_subscriber(subscriber: SubscriberCreate, db = Depends(get_db)):
 
 @app.get("/contact", response_class=HTMLResponse)
 async def contact_page(request: Request):
+    """Contact page with beautiful template."""
     try:
         from fastapi.templating import Jinja2Templates
         templates = Jinja2Templates(directory="templates")
         return templates.TemplateResponse("contact.html", {"request": request})
-    except Exception:
-        return HTMLResponse("""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Contact - AI News Digest</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body { font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; }
-                .form-container { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); }
-                .form-group { margin: 20px 0; }
-                label { display: block; margin-bottom: 8px; font-weight: bold; }
-                input, textarea { width: 100%; padding: 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.9); color: #333; }
-                button { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 15px 30px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
-            </style>
-        </head>
-        <body>
-            <div class="form-container">
-                <h1>📞 Contact Us</h1>
-                <form method="post" action="/contact">
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="subject">Subject:</label>
-                        <input type="text" id="subject" name="subject" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Message:</label>
-                        <textarea id="message" name="message" rows="5" required></textarea>
-                    </div>
-                    <button type="submit">📧 Send Message</button>
-                </form>
-                <p style="text-align: center; margin-top: 20px;">
-                    <a href="/" style="color: white;">← Back to Home</a>
-                </p>
-            </div>
-        </body>
-        </html>
-        """)
+    except Exception as e:
+        logger.error(f"Template error: {e}")
+        raise HTTPException(status_code=500, detail="Template service unavailable")
 
 @app.post("/contact")
 async def submit_contact(contact: ContactForm, db = Depends(get_db)):
@@ -616,102 +486,14 @@ async def admin_login():
 
 @app.get("/admin/dashboard", response_class=HTMLResponse)
 async def admin_dashboard(request: Request, admin: bool = Depends(verify_admin_key)):
+    """Admin dashboard with beautiful template."""
     try:
         from fastapi.templating import Jinja2Templates
         templates = Jinja2Templates(directory="templates")
         return templates.TemplateResponse("admin_dashboard.html", {"request": request})
-    except Exception:
-        return HTMLResponse("""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>📊 Admin Dashboard - AI News Digest</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; }
-                .dashboard { max-width: 1200px; margin: 0 auto; }
-                .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0; }
-                .stat-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); text-align: center; }
-                .stat-number { font-size: 2.5em; font-weight: bold; margin: 10px 0; }
-                .management-section { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); margin: 20px 0; }
-                .action-buttons { display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0; }
-                .btn { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-weight: bold; border: none; cursor: pointer; }
-            </style>
-        </head>
-        <body>
-            <div class="dashboard">
-                <h1>📊 AI News Digest Admin Dashboard</h1>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>👥 Total Subscribers</h3>
-                        <div class="stat-number" id="total-subscribers">Loading...</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>📧 Emails Sent Today</h3>
-                        <div class="stat-number" id="emails-today">Loading...</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>⚡ System Status</h3>
-                        <div class="stat-number" id="system-status">Loading...</div>
-                    </div>
-                </div>
-                
-                <div class="management-section">
-                    <h2>🛠️ Management Actions</h2>
-                    <div class="action-buttons">
-                        <button class="btn" onclick="sendTestDigest()">📧 Send Test Digest</button>
-                        <button class="btn" onclick="exportSubscribers()">📊 Export Subscribers</button>
-                        <button class="btn" onclick="viewEmailLogs()">📋 View Email Logs</button>
-                        <button class="btn" onclick="checkSystemHealth()">🏥 System Health</button>
-                    </div>
-                </div>
-                
-                <div class="management-section">
-                    <h2>📈 Analytics</h2>
-                    <p>Platform analytics and usage statistics will be displayed here.</p>
-                </div>
-            </div>
-            
-            <script>
-                // Load dashboard data
-                async function loadDashboardData() {
-                    try {
-                        const response = await fetch('/api/stats', {
-                            headers: { 'X-Admin-Key': localStorage.getItem('admin_key') }
-                        });
-                        const data = await response.json();
-                        
-                        document.getElementById('total-subscribers').textContent = data.total_subscribers || 0;
-                        document.getElementById('emails-today').textContent = data.emails_sent_today || 0;
-                        document.getElementById('system-status').textContent = data.status || 'Unknown';
-                    } catch (error) {
-                        console.error('Error loading dashboard data:', error);
-                    }
-                }
-                
-                function sendTestDigest() {
-                    alert('Test digest functionality would be triggered here');
-                }
-                
-                function exportSubscribers() {
-                    alert('Subscriber export would be triggered here');
-                }
-                
-                function viewEmailLogs() {
-                    alert('Email logs would be displayed here');
-                }
-                
-                function checkSystemHealth() {
-                    window.open('/health', '_blank');
-                }
-                
-                // Load data on page load
-                loadDashboardData();
-            </script>
-        </body>
-        </html>
-        """)
+    except Exception as e:
+        logger.error(f"Template error: {e}")
+        raise HTTPException(status_code=500, detail="Template service unavailable")
 
 @app.get("/api/stats")
 async def get_stats(request: Request, admin: bool = Depends(verify_admin_key)):
