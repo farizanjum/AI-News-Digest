@@ -355,11 +355,21 @@ async def get_stats(admin: bool = Depends(verify_admin_key)):
 # Add Mangum handler for Vercel
 try:
     from mangum import Mangum  # type: ignore
-    handler = Mangum(app)
+    handler = Mangum(app, lifespan="off")
     logger.info("Mangum handler initialized for Vercel deployment")
 except ImportError:
     logger.info("Running in development mode")
     pass
+except Exception as e:
+    logger.warning(f"Mangum initialization issue: {e}")
+    # Fallback handler
+    try:
+        from mangum import Mangum  # type: ignore
+        handler = Mangum(app)
+        logger.info("Mangum handler initialized with default settings")
+    except:
+        logger.error("Could not initialize Mangum handler")
+        pass
 
 if __name__ == "__main__":
     import uvicorn
