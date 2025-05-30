@@ -1,0 +1,42 @@
+name: Deploy and Schedule AI News Digest
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # Send digest daily at 9 AM UTC (adjust timezone as needed)
+    - cron: '0 9 * * *'
+
+jobs:
+  deploy:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+
+  send-digest:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Daily Tech Digest
+        run: |
+          curl -X POST "${{ secrets.VERCEL_DEPLOYMENT_URL }}/api/digest/send-test?digest_type=tech" \
+            -H "X-Admin-Key: ${{ secrets.ADMIN_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            --fail --silent --show-error
+      
+      - name: Send Daily UPSC Digest  
+        run: |
+          curl -X POST "${{ secrets.VERCEL_DEPLOYMENT_URL }}/api/digest/send-test?digest_type=upsc" \
+            -H "X-Admin-Key: ${{ secrets.ADMIN_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            --fail --silent --show-error 

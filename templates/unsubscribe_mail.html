@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsubscribed from AI News Digest</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #0f172a;
+            padding: 40px 0;
+        }
+        .main {
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            background-color: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 30px 20px;
+            text-align: center;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+        .header h1 {
+            color: #00f2fe;
+            margin: 0;
+            font-size: 32px;
+            font-weight: 800;
+        }
+        .content {
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .message {
+            font-size: 16px;
+            color: #e2e8f0;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: transform 0.3s ease;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+        .footer p {
+            color: #94a3b8;
+            margin: 0;
+            font-size: 14px;
+        }
+        .highlight {
+            color: #00f2fe;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <center class="wrapper">
+        <table class="main" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+            <tr>
+                <td class="header">
+                    <h1>Unsubscribed Successfully</h1>
+                </td>
+            </tr>
+            <tr>
+                <td class="content">
+                    <p class="message">
+                        Hello {{name}},
+                    </p>
+                    <p class="message">
+                        You have been successfully unsubscribed from AI News Digest. Your email has been removed from our database.
+                    </p>
+                    <p class="message">
+                        We're sorry to see you go! If you change your mind, you can always resubscribe to continue receiving our curated tech news updates.
+                    </p>
+                    <a href="{{resubscribe_url}}" class="button">Subscribe Again</a>
+                    <p class="message">
+                        Thank you for being a part of our community. We hope to see you again soon!
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="footer">
+                    <p>AI News Digest - Powered by Autonomous AI Agent</p>
+                    <p style="margin-top: 10px;">
+                        <a href="{{preferences_url}}" style="color: #00f2fe; text-decoration: none;">Manage Preferences</a>
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html> 

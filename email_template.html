@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Daily Tech News Digest</title>
+    <style type="text/css">
+        /* Email-safe modern styles */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f0f23;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        /* Main container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            padding: 2px;
+            border-radius: 16px;
+        }
+
+        .email-content {
+            background-color: #1a1a2e;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #ffffff, #f8f9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: #ffffff;
+        }
+
+        .header .subtitle {
+            margin-top: 8px;
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        /* Content area */
+        .content {
+            padding: 30px;
+            background-color: #1a1a2e;
+        }
+
+        /* Greeting card */
+        .greeting {
+            background: linear-gradient(135deg, #4c6ef5 0%, #6c5ce7 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(76, 110, 245, 0.3);
+        }
+
+        .greeting h2 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .greeting p {
+            margin: 0;
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        /* Article cards */
+        .article {
+            background: linear-gradient(135deg, #2d3561 0%, #1e2a5e 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #3d4785;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .article:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Article title */
+        .article-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.3;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .article-title a {
+            color: #ffffff;
+            text-decoration: none;
+            display: block;
+        }
+
+        .article-title a:hover {
+            color: #a8b4ff;
+        }
+
+        /* Article meta */
+        .article-meta {
+            font-size: 14px;
+            color: #a8b4ff;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        /* Article description */
+        .article-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e1e5f0;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+
+        /* Read more button */
+        .read-more {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff !important;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .read-more:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6c42a0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+            color: #ffffff !important;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #2d3561 0%, #1e2a5e 100%);
+            padding: 30px;
+            text-align: center;
+            color: #ffffff;
+            border-top: 1px solid #3d4785;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .footer a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 12px;
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .footer a:hover {
+            background: rgba(102, 126, 234, 0.5);
+            transform: translateY(-1px);
+        }
+
+        /* Responsive design */
+        @media screen and (max-width: 600px) {
+            .email-container {
+                margin: 10px;
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .article {
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+            
+            .article-title {
+                font-size: 18px;
+            }
+            
+            .article-description {
+                font-size: 15px;
+            }
+            
+            .footer {
+                padding: 25px 20px;
+            }
+        }
+
+        /* Additional modern touches */
+        .accent-line {
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            margin: 20px 0;
+            border-radius: 2px;
+        }
+
+        .stats-section {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stats-section p {
+            margin: 0;
+            color: #a8b4ff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Article source label */
+        .article-source {
+            background: rgba(102, 126, 234, 0.15);
+            color: #a8b4ff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-content">
+            <!-- Header -->
+            <div class="header">
+                <h1>🚀 Daily Tech Digest</h1>
+                <div class="subtitle">{{current_date}}</div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Greeting -->
+                <div class="greeting">
+                    <h2>Hello {{subscriber_name}}! 👋</h2>
+                    <p>Here are today's most exciting tech stories curated just for you</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-section">
+                    <p>📰 Today's selection includes the latest breakthroughs in AI, tech innovations, and industry news</p>
+                </div>
+
+                <div class="accent-line"></div>
+
+                <!-- Articles -->
+                {{CATEGORY_BLOCKS}}
+                
+                <div class="accent-line"></div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>🤖 Curated by your autonomous AI news agent</p>
+                <p>Stay ahead with the latest in technology</p>
+                <p>
+                    <a href="{{unsubscribe_url}}">Unsubscribe</a>
+                    <a href="{{preferences_url}}">Manage Preferences</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

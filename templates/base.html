@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tech News Digest{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}?v=2025.8">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 min-h-screen flex flex-col text-white">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 bg-grid-pattern opacity-10"></div>
+    
+    <!-- Header -->
+    <header id="header" class="header-transparent sticky top-0 z-50 transition-all duration-300">
+        <nav class="container mx-auto px-4 py-3 sm:py-4">
+            <div class="flex justify-between items-center">
+                <a href="/" class="text-lg sm:text-xl md:text-2xl font-bold text-white hover:text-cyan-400 transition-all duration-300 whitespace-nowrap">
+                    AI News Digest
+                </a>
+                <div class="hidden sm:flex space-x-4 md:space-x-8">
+                    <a href="/" class="text-gray-300 hover:text-white transition-all duration-300 nav-link text-sm md:text-base">Home</a>
+                    <a href="/privacy" class="text-gray-300 hover:text-white transition-all duration-300 nav-link text-sm md:text-base">Privacy</a>
+                    <a href="/terms" class="text-gray-300 hover:text-white transition-all duration-300 nav-link text-sm md:text-base">Terms</a>
+                    <a href="/contact" class="text-gray-300 hover:text-white transition-all duration-300 nav-link text-sm md:text-base">Contact</a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <button class="sm:hidden text-white p-2" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden sm:hidden mt-4 pb-4 border-t border-white/10">
+                <div class="flex flex-col space-y-3 pt-4">
+                    <a href="/" class="text-gray-300 hover:text-white transition-all duration-300 py-2 px-4 rounded hover:bg-white/10">Home</a>
+                    <a href="/privacy" class="text-gray-300 hover:text-white transition-all duration-300 py-2 px-4 rounded hover:bg-white/10">Privacy</a>
+                    <a href="/terms" class="text-gray-300 hover:text-white transition-all duration-300 py-2 px-4 rounded hover:bg-white/10">Terms</a>
+                    <a href="/contact" class="text-gray-300 hover:text-white transition-all duration-300 py-2 px-4 rounded hover:bg-white/10">Contact</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow relative z-10">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="backdrop-blur-lg bg-white/5 border-t border-white/10 mt-auto">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center">
+                <div class="mb-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-white mb-2">AI News Digest</h3>
+                    <p class="text-gray-400 text-sm sm:text-base">Powered by AI Autonomous Agent</p>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8">
+                    <a href="/privacy" class="text-gray-400 hover:text-white transition-all duration-300 relative z-10 text-sm sm:text-base">Privacy Policy</a>
+                    <a href="/terms" class="text-gray-400 hover:text-white transition-all duration-300 relative z-10 text-sm sm:text-base">Terms of Service</a>
+                    <a href="/contact" class="text-gray-400 hover:text-white transition-all duration-300 relative z-10 text-sm sm:text-base">Contact</a>
+                </div>
+                <div class="mt-6 pt-4 border-t border-white/10">
+                    <p class="text-gray-500 text-xs sm:text-sm">© 2025 AI News Digest. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Enhanced Header Scroll Effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            const scrolled = window.pageYOffset;
+            
+            if (scrolled > 50) {
+                header.classList.remove('header-transparent');
+                header.classList.add('header-scrolled');
+            } else {
+                header.classList.remove('header-scrolled');
+                header.classList.add('header-transparent');
+            }
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

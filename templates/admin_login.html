@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - AI News Digest</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}?v=admin.1">
+    <style>
+        /* Enhanced mobile-first admin login styles */
+        .admin-login-container {
+            min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .login-glass {
+            backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .form-input-enhanced {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            min-height: 48px; /* Touch-friendly */
+        }
+        
+        .form-input-enhanced:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        
+        .btn-enhanced {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border: none;
+            min-height: 56px; /* Extra touch-friendly */
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-enhanced:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-enhanced:active {
+            transform: translateY(0);
+        }
+        
+        .btn-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-enhanced:hover::before {
+            left: 100%;
+        }
+        
+        .error-enhanced {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            backdrop-filter: blur(10px);
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .login-container {
+                padding: 1rem;
+                min-height: 100vh;
+                min-height: 100dvh;
+            }
+            
+            .login-card {
+                margin: 0;
+                min-height: auto;
+            }
+            
+            .floating-element {
+                display: none; /* Hide floating elements on mobile to improve performance */
+            }
+        }
+        
+        /* Loading state */
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Enhanced focus management for accessibility */
+        .focus-visible:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="admin-login-container bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center text-white">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+    
+    <!-- Floating Elements (hidden on mobile) -->
+    <div class="floating-element absolute top-10 left-10 w-16 h-16 md:w-20 md:h-20 bg-blue-500/20 rounded-full blur-xl animate-pulse hidden sm:block"></div>
+    <div class="floating-element absolute bottom-10 right-10 w-24 h-24 md:w-32 md:h-32 bg-purple-500/20 rounded-full blur-xl animate-pulse hidden sm:block" style="animation-delay: 2s;"></div>
+    <div class="floating-element absolute top-1/2 left-1/4 w-12 h-12 bg-cyan-500/15 rounded-full blur-lg animate-pulse hidden lg:block" style="animation-delay: 4s;"></div>
+
+    <div class="login-container w-full max-w-md mx-auto px-4 relative z-10">
+        <div class="login-card login-glass p-6 md:p-8 rounded-2xl md:rounded-3xl shadow-2xl">
+            <!-- Enhanced Header -->
+            <div class="text-center mb-6 md:mb-8">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-xl">
+                    <svg class="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold gradient-text mb-2">Admin Dashboard</h1>
+                <p class="text-gray-400 text-sm md:text-base">Secure access to AI News Digest</p>
+            </div>
+
+            <!-- Enhanced Login Form -->
+            <form id="adminLoginForm" class="space-y-6">
+                <div>
+                    <label for="adminKey" class="block text-sm font-medium text-gray-300 mb-3">
+                        Admin API Key
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="adminKey" 
+                            name="adminKey" 
+                            class="form-input-enhanced focus-visible w-full px-4 md:px-6 py-3 md:py-4 rounded-xl text-white placeholder-gray-400 text-base md:text-lg" 
+                            placeholder="Enter your admin API key" 
+                            required
+                            autocomplete="current-password"
+                            aria-describedby="key-help"
+                        >
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <button 
+                                type="button" 
+                                id="togglePassword"
+                                class="text-gray-400 hover:text-white transition-colors p-2"
+                                aria-label="Toggle password visibility"
+                            >
+                                <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <p id="key-help" class="mt-2 text-xs text-gray-500">
+                        Find your admin key in the .env file: ADMIN_API_KEY
+                    </p>
+                </div>
+
+                <button 
+                    type="submit" 
+                    id="loginBtn" 
+                    class="btn-enhanced focus-visible w-full rounded-xl font-semibold text-lg md:text-xl relative overflow-hidden"
+                    aria-describedby="login-status"
+                >
+                    <span id="loginText">Access Dashboard</span>
+                    <div id="loginSpinner" class="loading-spinner mx-auto hidden"></div>
+                </button>
+            </form>
+
+            <!-- Enhanced Error Message -->
+            <div id="errorMessage" class="hidden mt-6 p-4 md:p-6 rounded-xl error-enhanced">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-200">Authentication Failed</h3>
+                        <p class="mt-1 text-sm text-red-300" id="errorText">
+                            Invalid admin key. Please check your key and try again.
+                        </p>
+                    </div>
+                    <button 
+                        id="closeError"
+                        class="ml-auto flex-shrink-0 text-red-400 hover:text-red-200 transition-colors p-1"
+                        aria-label="Close error message"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Enhanced Navigation -->
+            <div class="mt-6 md:mt-8 text-center">
+                <a 
+                    href="/" 
+                    class="text-gray-400 hover:text-white transition-colors duration-300 text-sm md:text-base inline-flex items-center group focus-visible"
+                >
+                    <svg class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to Home
+                </a>
+            </div>
+
+            <!-- Additional Help -->
+            <div class="mt-6 p-4 rounded-lg bg-white/5 border border-white/10">
+                <h4 class="text-sm font-medium text-gray-300 mb-2">Need Help?</h4>
+                <p class="text-xs text-gray-400 leading-relaxed">
+                    Your admin API key is automatically generated in the <code class="bg-gray-800 px-1 rounded text-blue-300">.env</code> file. 
+                    Run <code class="bg-gray-800 px-1 rounded text-blue-300">grep ADMIN_API_KEY .env</code> to find it.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced admin login functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('adminLoginForm');
+            const adminKeyInput = document.getElementById('adminKey');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loginSpinner = document.getElementById('loginSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const togglePassword = document.getElementById('togglePassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const closeError = document.getElementById('closeError');
+
+            // Password visibility toggle
+            togglePassword.addEventListener('click', function() {
+                const type = adminKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                adminKeyInput.setAttribute('type', type);
+                
+                // Update eye icon
+                if (type === 'text') {
+                    eyeIcon.innerHTML = `
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+                    `;
+                } else {
+                    eyeIcon.innerHTML = `
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    `;
+                }
+            });
+
+            // Close error message
+            closeError.addEventListener('click', function() {
+                errorMessage.classList.add('hidden');
+            });
+
+            // Auto-hide error after clicking outside
+            document.addEventListener('click', function(e) {
+                if (!errorMessage.contains(e.target) && !errorMessage.classList.contains('hidden')) {
+                    errorMessage.classList.add('hidden');
+                }
+            });
+
+            // Enhanced form submission with attempt tracking
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const adminKey = adminKeyInput.value.trim();
+                
+                if (!adminKey) {
+                    showError('Please enter your admin API key');
+                    adminKeyInput.focus();
+                    return;
+                }
+                
+                // Show loading state
+                setLoadingState(true);
+                hideError();
+                
+                try {
+                    console.log('Attempting admin login...');
+                    
+                    // Test the admin key by calling the stats endpoint
+                    const response = await fetch('/api/stats', {
+                        method: 'GET',
+                        headers: {
+                            'X-Admin-Key': adminKey,
+                            'Content-Type': 'application/json'
+                        },
+                        signal: AbortSignal.timeout(10000) // 10 second timeout
+                    });
+                    
+                    console.log('Login response status:', response.status);
+                    
+                    if (response.ok) {
+                        // Store the admin key in session storage
+                        sessionStorage.setItem('adminKey', adminKey);
+                        
+                        // Success feedback
+                        loginText.textContent = 'Success! Redirecting...';
+                        loginBtn.classList.add('bg-green-600');
+                        
+                        console.log('Login successful, redirecting...');
+                        
+                        // Redirect to admin dashboard after brief delay
+                        setTimeout(() => {
+                            window.location.href = '/admin/dashboard';
+                        }, 1000);
+                    } else if (response.status === 429) {
+                        // Rate limited
+                        const errorData = await response.text();
+                        throw new Error(errorData);
+                    } else if (response.status === 401) {
+                        // Invalid credentials with attempt count
+                        const errorData = await response.text();
+                        throw new Error(errorData);
+                    } else {
+                        throw new Error('Login failed. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    
+                    let errorMessage = 'Invalid admin key. Please check your key and try again.';
+                    
+                    if (error.name === 'AbortError' || error.message.includes('timeout')) {
+                        errorMessage = 'Login timeout. Please check your connection and try again.';
+                    } else if (error.message.includes('attempts remaining')) {
+                        errorMessage = error.message;
+                    } else if (error.message.includes('Too many failed attempts')) {
+                        errorMessage = error.message;
+                        // Disable form for a while
+                        setTimeout(() => {
+                            adminKeyInput.disabled = false;
+                            loginBtn.disabled = false;
+                        }, 60000); // Re-enable after 1 minute
+                        adminKeyInput.disabled = true;
+                    } else if (error.message.includes('Failed to fetch')) {
+                        errorMessage = 'Network error. Please check your internet connection.';
+                    }
+                    
+                    showError(errorMessage);
+                    adminKeyInput.value = '';
+                    adminKeyInput.focus();
+                } finally {
+                    setLoadingState(false);
+                }
+            });
+
+            // Loading state management
+            function setLoadingState(loading) {
+                if (loading) {
+                    loginText.classList.add('hidden');
+                    loginSpinner.classList.remove('hidden');
+                    loginBtn.disabled = true;
+                    loginBtn.classList.add('opacity-75');
+                } else {
+                    loginText.classList.remove('hidden');
+                    loginSpinner.classList.add('hidden');
+                    loginBtn.disabled = false;
+                    loginBtn.classList.remove('opacity-75');
+                    loginText.textContent = 'Access Dashboard';
+                    loginBtn.classList.remove('bg-green-600');
+                }
+            }
+
+            // Error management
+            function showError(message) {
+                document.getElementById('errorText').textContent = message;
+                errorMessage.classList.remove('hidden');
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            function hideError() {
+                errorMessage.classList.add('hidden');
+            }
+
+            // Auto-focus on admin key input
+            adminKeyInput.focus();
+
+            // Enhanced keyboard navigation
+            adminKeyInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+
+            // Input validation feedback
+            adminKeyInput.addEventListener('input', function() {
+                hideError();
+                
+                // Visual feedback for valid input length
+                if (this.value.length > 10) {
+                    this.classList.add('border-green-500/50');
+                    this.classList.remove('border-red-500/50');
+                } else if (this.value.length > 0) {
+                    this.classList.add('border-yellow-500/50');
+                    this.classList.remove('border-green-500/50', 'border-red-500/50');
+                } else {
+                    this.classList.remove('border-green-500/50', 'border-yellow-500/50', 'border-red-500/50');
+                }
+            });
+
+            // Prevent form submission when offline
+            window.addEventListener('offline', function() {
+                if (!loginBtn.disabled) {
+                    showError('You are offline. Please check your internet connection.');
+                }
+            });
+
+            // Clear error when back online
+            window.addEventListener('online', function() {
+                hideError();
+            });
+        });
+    </script>
+</body>
+</html> 

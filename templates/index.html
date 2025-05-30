@@ -1,0 +1,610 @@
+{% extends "base.html" %}
+
+{% block title %}Autonomous News Digest - Your Daily AI & Tech Updates{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center py-24 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto px-4">
+        <div class="relative">
+            <!-- Floating Elements -->
+            <div class="absolute top-10 left-10 w-20 h-20 bg-blue-500/20 rounded-full blur-xl animate-pulse hidden sm:block"></div>
+            <div class="absolute bottom-10 right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-xl animate-pulse hidden sm:block"></div>
+            
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-bold gradient-text mb-6 animate-fade-in leading-tight">
+                <span id="typewriter-container" class="typewriter-container">
+                    <span id="typewriter-text" class="typewriter-text"></span>
+                    <span id="typewriter-cursor" class="typewriter-cursor">|</span>
+                </span>
+            </h1>
+            <p class="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed px-2">
+                Get your daily dose of the latest in AI, technology, and UPSC updates delivered directly to your inbox. 
+                Stay informed with curated news that matters, powered by advanced AI.
+            </p>
+            <a href="#subscribe" class="btn-modern text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 inline-flex items-center space-x-2 scroll-smooth mx-auto">
+                <span>Start Your Daily Digest</span>
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Infographics Section -->
+<section class="py-12 sm:py-16 bg-gradient-to-r from-blue-900/20 to-purple-900/20">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text mb-4">How It Works</h2>
+            <p class="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto px-2">
+                Discover how our AI-powered autonomous system delivers personalized news digests to your inbox
+            </p>
+        </div>
+        
+        <div class="max-w-5xl mx-auto">
+            <div class="glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 hover:scale-105 transition-all duration-500 shadow-2xl">
+                <div class="relative overflow-hidden rounded-xl sm:rounded-2xl">
+                    <img 
+                        src="https://i.ibb.co/b5Xqts3v/AI-news-digest-infographics.png" 
+                        alt="AI News Digest - How It Works Infographics" 
+                        class="w-full h-auto object-contain transition-transform duration-300 hover:scale-105"
+                        loading="lazy"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-12 sm:py-20">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-8 sm:mb-16">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text mb-4">Why Choose Our Digest?</h2>
+            <p class="text-gray-300 text-base sm:text-lg max-w-3xl mx-auto leading-relaxed px-2">
+                Experience the future of news consumption with our AI-powered autonomous digest system
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div class="feature-card text-center p-6 sm:p-8 glass rounded-2xl hover:scale-105 transition-all duration-300">
+                <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl">
+                    <svg class="w-8 sm:w-10 h-8 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-400">AI-Powered Curation</h3>
+                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">Advanced artificial intelligence analyzes thousands of articles to bring you only the most relevant and important news.</p>
+            </div>
+            <div class="feature-card text-center p-6 sm:p-8 glass rounded-2xl hover:scale-105 transition-all duration-300">
+                <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl">
+                    <svg class="w-8 sm:w-10 h-8 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-green-400">Daily at 8:00 PM</h3>
+                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">Receive your personalized digest every day at 8:00 PM, perfectly timed to keep you updated with the day's important news.</p>
+            </div>
+            <div class="feature-card text-center p-6 sm:p-8 glass rounded-2xl hover:scale-105 transition-all duration-300 sm:col-span-2 lg:col-span-1">
+                <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl">
+                    <svg class="w-8 sm:w-10 h-8 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-purple-400">Completely Customizable</h3>
+                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">Choose your interests and get news tailored specifically to your preferences and professional needs.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Subscription Section -->
+<section id="subscribe" class="py-12 sm:py-20">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <div class="glass p-6 sm:p-8 md:p-12 rounded-2xl sm:rounded-3xl shadow-2xl">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 gradient-text">Subscribe to Your Daily Digest</h2>
+            <p class="text-center text-gray-300 mb-6 sm:mb-8 text-base sm:text-lg px-2">Join thousands of professionals who stay informed with our AI-curated news digest.</p>
+            
+            <div class="subscription-container">
+                <form id="subscriptionForm" class="space-y-6 sm:space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div>
+                            <input type="text" name="name" placeholder="Your Name" 
+                                   class="form-input w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl focus:ring-2 focus:ring-blue-500 text-base sm:text-lg" required>
+                        </div>
+                        <div>
+                            <input type="email" name="email" placeholder="Your Email" 
+                                   class="form-input w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl focus:ring-2 focus:ring-blue-500 text-base sm:text-lg" required>
+                        </div>
+                    </div>
+
+                    <!-- Digest Type Selection -->
+                    <div>
+                        <label class="block text-base sm:text-lg font-medium text-gray-300 mb-3 sm:mb-4">Choose Your Digest Type:</label>
+                        <div class="space-y-3 sm:space-y-4">
+                            <label class="digest-type-option flex items-center p-3 sm:p-4 rounded-xl border border-gray-600 hover:border-blue-500 cursor-pointer transition-all duration-300 hover:bg-blue-500/10">
+                                <input type="radio" name="digest_type" value="tech" class="mr-3 sm:mr-4 text-blue-600 w-4 h-4 sm:w-5 sm:h-5">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-blue-400 text-base sm:text-lg">Tech News Digest</div>
+                                    <div class="text-xs sm:text-sm text-gray-400">AI, Cloud, Cybersecurity, Startups & More</div>
+                                </div>
+                            </label>
+                            <label class="digest-type-option flex items-center p-3 sm:p-4 rounded-xl border border-gray-600 hover:border-green-500 cursor-pointer transition-all duration-300 hover:bg-green-500/10">
+                                <input type="radio" name="digest_type" value="upsc" class="mr-3 sm:mr-4 text-green-600 w-4 h-4 sm:w-5 sm:h-5">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-green-400 text-base sm:text-lg">UPSC Digest</div>
+                                    <div class="text-xs sm:text-sm text-gray-400">Current Affairs, Polity, Economy, Environment & More</div>
+                                </div>
+                            </label>
+                            <label class="digest-type-option flex items-center p-3 sm:p-4 rounded-xl border border-gray-600 hover:border-purple-500 cursor-pointer transition-all duration-300 hover:bg-purple-500/10">
+                                <input type="radio" name="digest_type" value="both" class="mr-3 sm:mr-4 text-purple-600 w-4 h-4 sm:w-5 sm:h-5">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-purple-400 text-base sm:text-lg">Both Digests</div>
+                                    <div class="text-xs sm:text-sm text-gray-400">Get both Tech and UPSC news daily</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Tech Preferences (shown when tech or both is selected) -->
+                    <div id="techPreferences" class="preference-section hidden">
+                        <label class="block text-lg font-medium text-gray-300 mb-4">Tech News Preferences:</label>
+                        <div class="space-y-4">
+                            <label class="checkbox-container block flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors">
+                                <input type="checkbox" name="all_categories" class="preference-checkbox">
+                                <span class="checkmark"></span>
+                                <span class="select-none font-medium">All Categories</span>
+                            </label>
+                            <div class="ml-8 space-y-3 category-options">
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="ai" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">Artificial Intelligence</span>
+                                </label>
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="cybersecurity" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">Cybersecurity</span>
+                                </label>
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="cloud" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">Cloud Computing</span>
+                                </label>
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="startup" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">Startups & Entrepreneurship</span>
+                                </label>
+                            </div>
+                            <label class="checkbox-container disabled block flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 opacity-50 cursor-not-allowed">
+                                <input type="checkbox" name="custom" class="preference-checkbox" disabled>
+                                <span class="checkmark"></span>
+                                <span class="select-none">Custom Interests</span>
+                                <span class="ml-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-xs font-bold text-white">Coming Soon</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- UPSC Preferences (shown when upsc or both is selected) -->
+                    <div id="upscPreferences" class="preference-section hidden">
+                        <label class="block text-lg font-medium text-gray-300 mb-4">UPSC News Preferences:</label>
+                        <div class="space-y-4">
+                            <label class="checkbox-container block flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors">
+                                <input type="checkbox" name="upsc_all" class="preference-checkbox">
+                                <span class="checkmark"></span>
+                                <span class="select-none font-medium">All UPSC Categories</span>
+                            </label>
+                            <div class="ml-8 space-y-3 category-options">
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="polity" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">Polity & Governance</span>
+                                </label>
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="economy" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">Economy</span>
+                                </label>
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="environment" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">Environment</span>
+                                </label>
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="international" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">International Relations</span>
+                                </label>
+                                <label class="checkbox-container block flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                    <input type="checkbox" name="science" class="preference-checkbox">
+                                    <span class="checkmark"></span>
+                                    <span class="select-none">Science & Technology</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="custom-interests" style="display:none;">
+                        <textarea id="customInterests" name="custom_interests" rows="3"
+                            class="form-input w-full px-6 py-4 rounded-xl focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter your specific interests (e.g., blockchain, quantum computing, IoT)" disabled></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-modern w-full text-base sm:text-lg py-3 sm:py-4 rounded-xl font-semibold min-h-[48px] sm:min-h-[56px]">
+                        Subscribe Now
+                    </button>
+                </form>
+
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message hidden mt-6 p-6 sm:p-8 rounded-xl text-center">
+                    <div class="flex items-center justify-center mb-4">
+                        <svg class="w-12 h-12 sm:w-16 sm:h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-green-400 mb-4">Welcome aboard! 🎉</h3>
+                    <p class="text-gray-300 text-base sm:text-lg mb-4">You've successfully subscribed to your daily news digest!</p>
+                    <p class="text-gray-400 text-sm sm:text-base">You'll receive your first digest at 8:00 PM today. Check your email for the welcome message!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-12 sm:py-20 bg-gradient-to-r from-purple-900/30 to-blue-900/30">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 text-center">
+            <div class="glass p-6 sm:p-8 rounded-2xl">
+                <div class="text-3xl sm:text-4xl font-bold gradient-text mb-2">24/7</div>
+                <div class="text-gray-300 text-sm sm:text-base">Autonomous Operation</div>
+            </div>
+            <div class="glass p-6 sm:p-8 rounded-2xl">
+                <div class="text-3xl sm:text-4xl font-bold gradient-text mb-2">10+</div>
+                <div class="text-gray-300 text-sm sm:text-base">News Sources</div>
+            </div>
+            <div class="glass p-6 sm:p-8 rounded-2xl sm:col-span-2 lg:col-span-1">
+                <div class="text-3xl sm:text-4xl font-bold gradient-text mb-2">20:00</div>
+                <div class="text-gray-300 text-sm sm:text-base">Daily Delivery Time</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Initializing form...');
+    
+    const form = document.getElementById('subscriptionForm');
+    if (!form) {
+        console.error('Form element not found!');
+        return;
+    }
+    
+    const successMessage = document.getElementById('successMessage');
+    const allCategoriesCheckbox = document.querySelector('input[name="all_categories"]');
+    const techCategoryCheckboxes = document.querySelectorAll('input[name="ai"], input[name="cybersecurity"], input[name="cloud"], input[name="startup"]');
+    const upscAllCheckbox = document.querySelector('input[name="upsc_all"]');
+    const upscCategoryCheckboxes = document.querySelectorAll('input[name="polity"], input[name="economy"], input[name="environment"], input[name="international"], input[name="science"]');
+    const customCheckbox = document.querySelector('input[name="custom"]');
+    const customInterests = document.querySelector('.custom-interests');
+    const digestTypeRadios = document.querySelectorAll('input[name="digest_type"]');
+    const techPreferences = document.getElementById('techPreferences');
+    const upscPreferences = document.getElementById('upscPreferences');
+
+    // Handle digest type selection
+    digestTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const digestType = this.value;
+            
+            // Clear all selections first
+            allCategoriesCheckbox.checked = false;
+            upscAllCheckbox.checked = false;
+            techCategoryCheckboxes.forEach(cb => cb.checked = false);
+            upscCategoryCheckboxes.forEach(cb => cb.checked = false);
+            
+            if (digestType === 'tech') {
+                techPreferences.classList.remove('hidden');
+                upscPreferences.classList.add('hidden');
+            } else if (digestType === 'upsc') {
+                techPreferences.classList.add('hidden');
+                upscPreferences.classList.remove('hidden');
+            } else if (digestType === 'both') {
+                techPreferences.classList.remove('hidden');
+                upscPreferences.classList.remove('hidden');
+                
+                // Auto-select all categories except custom interests
+                allCategoriesCheckbox.checked = true;
+                upscAllCheckbox.checked = true;
+                
+                // Auto-select individual categories too
+                techCategoryCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                    checkbox.disabled = true;
+                    checkbox.parentElement.classList.add('opacity-50');
+                });
+                upscCategoryCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                    checkbox.disabled = true;
+                    checkbox.parentElement.classList.add('opacity-50');
+                });
+            }
+        });
+    });
+
+    // Handle "All Categories" checkbox for tech
+    if (allCategoriesCheckbox) {
+        allCategoriesCheckbox.addEventListener('change', function() {
+            techCategoryCheckboxes.forEach(checkbox => {
+                if (this.checked) {
+                    checkbox.checked = true;
+                    checkbox.disabled = true;
+                    checkbox.parentElement.classList.add('opacity-50');
+                } else {
+                    checkbox.checked = false;
+                    checkbox.disabled = false;
+                    checkbox.parentElement.classList.remove('opacity-50');
+                }
+            });
+        });
+    }
+
+    // Handle "All UPSC Categories" checkbox
+    if (upscAllCheckbox) {
+        upscAllCheckbox.addEventListener('change', function() {
+            upscCategoryCheckboxes.forEach(checkbox => {
+                if (this.checked) {
+                    checkbox.checked = true;
+                    checkbox.disabled = true;
+                    checkbox.parentElement.classList.add('opacity-50');
+                } else {
+                    checkbox.checked = false;
+                    checkbox.disabled = false;
+                    checkbox.parentElement.classList.remove('opacity-50');
+                }
+            });
+        });
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        console.log('Form submission started...');
+
+        try {
+            const formData = new FormData(this);
+            const selectedPreferences = [];
+            const digestType = formData.get('digest_type');
+            
+            // Validate required fields
+            const name = formData.get('name');
+            const email = formData.get('email');
+            
+            if (!name || !email) {
+                throw new Error('Name and email are required');
+            }
+            
+            if (!digestType) {
+                throw new Error('Please select a digest type');
+            }
+            
+            // Collect preferences based on digest type
+            if (digestType === 'tech' || digestType === 'both') {
+                if (formData.get('all_categories') === 'on') {
+                    selectedPreferences.push('all');
+                } else {
+                    if (formData.get('ai') === 'on') selectedPreferences.push('ai');
+                    if (formData.get('cybersecurity') === 'on') selectedPreferences.push('cybersecurity');
+                    if (formData.get('cloud') === 'on') selectedPreferences.push('cloud');
+                    if (formData.get('startup') === 'on') selectedPreferences.push('startup');
+                }
+            }
+            
+            if (digestType === 'upsc' || digestType === 'both') {
+                if (formData.get('upsc_all') === 'on') {
+                    selectedPreferences.push('upsc_all');
+                } else {
+                    if (formData.get('polity') === 'on') selectedPreferences.push('polity');
+                    if (formData.get('economy') === 'on') selectedPreferences.push('economy');
+                    if (formData.get('environment') === 'on') selectedPreferences.push('environment');
+                    if (formData.get('international') === 'on') selectedPreferences.push('international');
+                    if (formData.get('science') === 'on') selectedPreferences.push('science');
+                }
+            }
+
+            // If no preferences selected, use default based on digest type
+            if (selectedPreferences.length === 0) {
+                if (digestType === 'upsc') {
+                    selectedPreferences.push('upsc_all');
+                } else {
+                    selectedPreferences.push('all');
+                }
+            }
+
+            const data = {
+                name: name,
+                email: email,
+                preferences: selectedPreferences.join(','),
+                digest_type: digestType
+            };
+
+            console.log('Submitting data:', data);
+
+            // Show loading state
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Subscribing...';
+            submitButton.disabled = true;
+
+            const response = await fetch('/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            console.log('Response status:', response.status);
+            const responseData = await response.json();
+            console.log('Response data:', responseData);
+
+            if (response.ok) {
+                console.log('Subscription successful');
+                form.reset();
+                
+                // Reset form state
+                techPreferences.classList.add('hidden');
+                upscPreferences.classList.add('hidden');
+                allCategoriesCheckbox.checked = false;
+                upscAllCheckbox.checked = false;
+                techCategoryCheckboxes.forEach(cb => {
+                    cb.checked = false;
+                    cb.disabled = false;
+                    cb.parentElement.classList.remove('opacity-50');
+                });
+                upscCategoryCheckboxes.forEach(cb => {
+                    cb.checked = false;
+                    cb.disabled = false;
+                    cb.parentElement.classList.remove('opacity-50');
+                });
+                
+                const successMessage = document.getElementById('successMessage');
+                successMessage.classList.remove('hidden');
+                successMessage.scrollIntoView({ behavior: 'smooth' });
+                
+                // Hide the message after 8 seconds
+                setTimeout(() => {
+                    successMessage.classList.add('hidden');
+                }, 8000);
+            } else {
+                throw new Error(responseData.detail || 'Subscription failed');
+            }
+        } catch (error) {
+            console.error('Error during form submission:', error);
+            alert(error.message || 'Failed to subscribe. Please try again.');
+        } finally {
+            // Reset button state
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.textContent = 'Subscribe Now';
+            submitButton.disabled = false;
+        }
+    });
+
+    console.log('Form initialization complete');
+
+    // BRAND NEW Typewriter Animation - Fixed PC Version
+    let typewriterRunning = false; // Prevent multiple instances
+    
+    function newTypeWriter() {
+        // Prevent multiple animations from running
+        if (typewriterRunning) {
+            return;
+        }
+        
+        const text = "Autonomous News Digest";
+        const textElement = document.getElementById('typewriter-text');
+        let cursorElement = document.getElementById('typewriter-cursor');
+        
+        if (!textElement) {
+            console.error('Text element not found');
+            return;
+        }
+        
+        // If cursor doesn't exist, create it
+        if (!cursorElement) {
+            console.log('Creating cursor element...');
+            cursorElement = document.createElement('span');
+            cursorElement.id = 'typewriter-cursor';
+            cursorElement.className = 'typewriter-cursor';
+            cursorElement.innerHTML = '|';
+            textElement.parentNode.appendChild(cursorElement);
+        }
+        
+        console.log('Cursor element:', cursorElement);
+        console.log('Cursor visible?', cursorElement.offsetWidth > 0 && cursorElement.offsetHeight > 0);
+        
+        typewriterRunning = true; // Mark as running
+        let currentIndex = 0;
+        
+        // Check if mobile
+        const isMobile = window.innerWidth <= 640;
+        
+        // For mobile, we'll still use the same text but let CSS handle wrapping
+        const displayText = text; // Always use the full text
+        
+        // Initialize elements - CLEAR PROPERLY
+        textElement.textContent = '';
+        
+        // Force show cursor and ensure blinking works
+        cursorElement.classList.remove('hidden');
+        cursorElement.style.display = 'inline-block';
+        cursorElement.style.color = '#00f2fe';
+        cursorElement.style.webkitTextFillColor = '#00f2fe';
+        cursorElement.style.animation = 'typewriter-blink 1s infinite';
+        cursorElement.style.animationPlayState = 'running';
+        cursorElement.innerHTML = '|';
+        
+        // Ensure animation keeps running
+        const animationInterval = setInterval(() => {
+            if (cursorElement && cursorElement.style.animationPlayState !== 'running') {
+                cursorElement.style.animation = 'typewriter-blink 1s infinite';
+                cursorElement.style.animationPlayState = 'running';
+            }
+        }, 500);
+        
+        function typeCharacter() {
+            if (currentIndex < displayText.length) {
+                // Build string properly - NO character mixing!
+                textElement.textContent = displayText.substring(0, currentIndex + 1);
+                currentIndex++;
+                setTimeout(typeCharacter, 120); // Smooth typing speed
+            } else {
+                // Complete - wait 3 seconds then restart
+                setTimeout(() => {
+                    typewriterRunning = false; // Allow new instance
+                    clearInterval(animationInterval); // Clean up interval
+                    currentIndex = 0;
+                    textElement.textContent = ''; // Clear with textContent
+                    newTypeWriter();
+                }, 3000);
+            }
+        }
+        
+        // Start typing after initial delay
+        setTimeout(typeCharacter, 800);
+    }
+    
+    // Initialize the new typewriter animation
+    setTimeout(newTypeWriter, 1200);
+    
+    // Restart on window resize to handle mobile/desktop switch
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            typewriterRunning = false; // Reset state
+            newTypeWriter();
+        }, 250);
+    });
+});
+</script>
+{% endblock %} 

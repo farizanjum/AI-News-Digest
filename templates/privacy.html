@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - AI News Digest{% endblock %}
+
+{% block content %}
+<div class="min-h-screen relative overflow-hidden">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 bg-grid-pattern opacity-20"></div>
+    <div class="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+    <div class="absolute top-0 right-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-0 left-0 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+
+    <div class="container mx-auto px-4 py-16 relative z-10">
+        <div class="max-w-4xl mx-auto">
+            <div class="glass p-8 rounded-2xl">
+                <h1 class="text-4xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    Privacy Policy
+                </h1>
+
+                <div class="space-y-8 text-gray-300">
+                    <section class="card-hover p-6 rounded-xl bg-opacity-10 bg-white">
+                        <h2 class="text-2xl font-semibold mb-4 text-white">Information We Collect</h2>
+                        <p class="mb-4">We collect the following information from our subscribers:</p>
+                        <ul class="list-disc list-inside space-y-2 ml-4">
+                            <li>Name</li>
+                            <li>Email address</li>
+                            <li>News preferences</li>
+                            <li>Custom interests (if specified)</li>
+                        </ul>
+                    </section>
+
+                    <section class="card-hover p-6 rounded-xl bg-opacity-10 bg-white">
+                        <h2 class="text-2xl font-semibold mb-4 text-white">How We Use Your Information</h2>
+                        <p class="mb-4">We use your information to:</p>
+                        <ul class="list-disc list-inside space-y-2 ml-4">
+                            <li>Send you personalized news digests</li>
+                            <li>Improve our service and content</li>
+                            <li>Communicate with you about your subscription</li>
+                            <li>Analyze usage patterns to enhance user experience</li>
+                        </ul>
+                    </section>
+
+                    <section class="card-hover p-6 rounded-xl bg-opacity-10 bg-white">
+                        <h2 class="text-2xl font-semibold mb-4 text-white">Data Protection</h2>
+                        <p class="mb-4">We implement appropriate security measures to protect your personal information:</p>
+                        <ul class="list-disc list-inside space-y-2 ml-4">
+                            <li>Encryption of data in transit and at rest</li>
+                            <li>Regular security assessments</li>
+                            <li>Access controls and authentication</li>
+                            <li>Secure data storage and backup</li>
+                        </ul>
+                    </section>
+
+                    <section class="card-hover p-6 rounded-xl bg-opacity-10 bg-white">
+                        <h2 class="text-2xl font-semibold mb-4 text-white">Your Rights</h2>
+                        <p class="mb-4">You have the right to:</p>
+                        <ul class="list-disc list-inside space-y-2 ml-4">
+                            <li>Access your personal information</li>
+                            <li>Update or correct your information</li>
+                            <li>Unsubscribe from our service</li>
+                            <li>Request deletion of your data</li>
+                        </ul>
+                    </section>
+
+                    <section class="card-hover p-6 rounded-xl bg-opacity-10 bg-white">
+                        <h2 class="text-2xl font-semibold mb-4 text-white">Cookies</h2>
+                        <p>We use cookies to improve your browsing experience and analyze website traffic. You can control cookie settings through your browser preferences.</p>
+                    </section>
+
+                    <section class="card-hover p-6 rounded-xl bg-opacity-10 bg-white">
+                        <h2 class="text-2xl font-semibold mb-4 text-white">Contact Us</h2>
+                        <p>If you have any questions about our privacy policy, please contact us at:</p>
+                        <a href="mailto:contact.ainewsdigest@gmail.com" class="text-blue-400 hover:text-blue-300 transition-colors">
+                            contact.ainewsdigest@gmail.com
+                        </a>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

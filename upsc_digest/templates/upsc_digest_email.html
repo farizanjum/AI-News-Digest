@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPSC Daily Digest</title>
+    <style>
+        body {
+            font-family: 'Merriweather', 'Segoe UI', Arial, sans-serif;
+            background: #f8fafc;
+            color: #1a237e;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 0 32px 0;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(30, 41, 59, 0.10);
+        }
+        .header {
+            background: linear-gradient(90deg, #1a237e 80%, #ff9933 100%);
+            color: #fff;
+            padding: 40px 20px 28px 20px;
+            border-radius: 18px 18px 0 0;
+            text-align: center;
+            position: relative;
+        }
+        .chakra {
+            position: absolute;
+            top: 18px;
+            right: 24px;
+            width: 48px;
+            opacity: 0.12;
+        }
+        .header h1 {
+            font-size: 2.6rem;
+            margin: 0 0 10px 0;
+            letter-spacing: 1px;
+            font-family: 'Merriweather', serif;
+        }
+        .header p {
+            font-size: 1.15rem;
+            margin: 0;
+            color: #e3e8f3;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 36px 0 18px 0;
+            padding: 10px 18px;
+            border-radius: 8px 8px 0 0;
+            background: linear-gradient(90deg, #ff9933 0%, #fff 100%);
+            color: #1a237e;
+            border-left: 6px solid #1a237e;
+            font-family: 'Merriweather', serif;
+        }
+        .category-block {
+            margin-bottom: 18px;
+        }
+        .article-block {
+            background: #f5f7fb;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            padding: 20px 18px;
+            box-shadow: 0 2px 8px rgba(40,53,147,0.04);
+        }
+        .article-title {
+            font-size: 1.13rem;
+            font-weight: 600;
+            color: #1a237e;
+            margin-bottom: 6px;
+        }
+        .article-meta {
+            font-size: 0.98rem;
+            color: #5c6bc0;
+            margin-bottom: 10px;
+        }
+        .article-description {
+            font-size: 1.05rem;
+            color: #22223b;
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+        .article-link {
+            color: #ff9933;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .footer {
+            background: #e8eaf6;
+            padding: 24px 20px;
+            text-align: center;
+            font-size: 1rem;
+            color: #5c6bc0;
+            border-radius: 0 0 18px 18px;
+        }
+        @media only screen and (max-width: 720px) {
+            .container {
+                padding: 0 2px 16px 2px;
+            }
+            .header, .footer {
+                padding: 16px 8px;
+            }
+            .section-title {
+                font-size: 1.1rem;
+                padding: 8px 8px;
+            }
+            .article-block {
+                padding: 12px 6px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>UPSC Daily Digest</h1>
+            <p>Curated news for UPSC aspirants: polity, governance, environment, economy, science, scheme, editorial, international relations, Indian society</p>
+        </div>
+        <div class="content" style="padding: 0 24px;">
+            {{CATEGORY_BLOCKS}}
+        </div>
+        <div class="footer">
+            <p>This digest is automatically generated and contains news articles relevant to UPSC preparation.</p>
+            <p>
+                <a href="{{UNSUBSCRIBE_LINK}}" style="color: #ff9933; font-weight:600;">Unsubscribe</a> |
+                <a href="{{PREFERENCES_LINK}}" style="color: #1a237e; font-weight:600;">Manage Preferences</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html> 

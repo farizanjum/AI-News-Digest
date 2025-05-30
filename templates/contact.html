@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - AI News Digest{% endblock %}
+
+{% block content %}
+<div class="min-h-screen relative overflow-hidden">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 bg-grid-pattern opacity-20"></div>
+    <div class="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob hidden sm:block"></div>
+    <div class="absolute top-0 right-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000 hidden sm:block"></div>
+    <div class="absolute bottom-0 left-0 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000 hidden sm:block"></div>
+
+    <div class="container mx-auto px-4 py-8 sm:py-16 relative z-10">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-8 sm:mb-16">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-white">
+                    Contact Us
+                </h1>
+                <p class="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto px-2">
+                    Have questions about our AI-powered news digest service? We'd love to hear from you. Send us a message and we'll get back to you as soon as possible.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <!-- Contact Form -->
+                <div class="glass p-6 sm:p-8 rounded-2xl">
+                    <form id="contactForm" class="space-y-4 sm:space-y-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                            <input type="text" id="name" name="name" required
+                                class="form-input w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[48px]">
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                            <input type="email" id="email" name="email" required
+                                class="form-input w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[48px]">
+                        </div>
+
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                            <input type="text" id="subject" name="subject" required
+                                class="form-input w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[48px]">
+                        </div>
+
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                            <textarea id="message" name="message" rows="4" required
+                                class="form-input w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[120px]"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-modern w-full">
+                            Send Message
+                        </button>
+                    </form>
+
+                    <!-- Success Message -->
+                    <div id="successMessage" class="success-message hidden mt-4 p-4 rounded-lg text-center">
+                        <p class="text-green-400">Thank you for your message! We'll get back to you soon.</p>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="space-y-8">
+                    <div class="glass p-8 rounded-2xl">
+                        <h2 class="text-2xl font-semibold mb-6 text-white">Get in Touch</h2>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-300 mb-2">Email</h3>
+                                <a href="mailto:contact.ainewsdigest@gmail.com" class="text-blue-400 hover:text-blue-300 transition-colors">
+                                    contact.ainewsdigest@gmail.com
+                                </a>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-300 mb-2">Response Time</h3>
+                                <p class="text-gray-300">We typically respond within 24-48 hours during business days.</p>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-300 mb-2">Office Hours</h3>
+                                <p class="text-gray-300">Monday - Friday: 9:00 AM - 6:00 PM EST</p>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-300 mb-2">About Our Service</h3>
+                                <p class="text-gray-300">AI News Digest is powered by an advanced AI agent that autonomously curates and delivers personalized technology news to your inbox daily.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('contactForm');
+    const successMessage = document.getElementById('successMessage');
+
+    // Helper function to extract error messages from various error formats
+    function extractErrorMessage(error) {
+        console.log('Error object:', error);
+        
+        // If it's a string, return it directly
+        if (typeof error === 'string') {
+            return error;
+        }
+        
+        // If it has a message property, use it
+        if (error && error.message) {
+            return error.message;
+        }
+        
+        // If it's an array of validation errors (Pydantic)
+        if (Array.isArray(error)) {
+            return error.map(err => {
+                if (typeof err === 'string') return err;
+                if (err.msg) return err.msg;
+                if (err.message) return err.message;
+                return 'Validation error';
+            }).join(', ');
+        }
+        
+        // If it's a Pydantic error object
+        if (error && Array.isArray(error.detail)) {
+            return error.detail.map(err => {
+                if (err.msg) return err.msg;
+                if (err.message) return err.message;
+                return 'Validation error';
+            }).join(', ');
+        }
+        
+        // If it has a detail property (FastAPI errors)
+        if (error && error.detail) {
+            if (typeof error.detail === 'string') {
+                return error.detail;
+            }
+            if (Array.isArray(error.detail)) {
+                return error.detail.map(item => {
+                    if (typeof item === 'string') return item;
+                    if (item.msg) return item.msg;
+                    if (item.message) return item.message;
+                    return 'Error';
+                }).join(', ');
+            }
+        }
+        
+        // Default fallback
+        return 'An unexpected error occurred';
+    }
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            subject: formData.get('subject'),
+            message: formData.get('message')
+        };
+
+        // Show submitting state
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Sending...';
+        submitButton.disabled = true;
+
+        try {
+            console.log('Submitting contact form:', data);
+            
+            const response = await fetch('/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            console.log('Response status:', response.status);
+            
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Success result:', result);
+                
+                form.reset();
+                successMessage.classList.remove('hidden');
+                
+                // Update success message
+                successMessage.innerHTML = `
+                    <p class="text-green-400">✅ ${result.message || 'Thank you for your message! We\'ll get back to you soon.'}</p>
+                `;
+                
+                setTimeout(() => {
+                    successMessage.classList.add('hidden');
+                }, 8000);
+            } else {
+                console.error('Response not ok:', response.status, response.statusText);
+                
+                let errorMessage = 'Failed to send message. Please try again.';
+                try {
+                    const errorData = await response.json();
+                    console.log('Error data received:', errorData);
+                    errorMessage = extractErrorMessage(errorData);
+                } catch (e) {
+                    console.error('Could not parse error response:', e);
+                }
+                
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            console.error('Contact form error:', error);
+            
+            // Extract proper error message
+            const errorMessage = extractErrorMessage(error);
+            
+            // Show user-friendly error message
+            successMessage.classList.remove('hidden');
+            successMessage.innerHTML = `
+                <p class="text-red-400">❌ ${errorMessage}</p>
+                <p class="text-gray-400 text-sm mt-2">If this problem persists, please email us directly at contact.ainewsdigest@gmail.com</p>
+            `;
+            
+            setTimeout(() => {
+                successMessage.classList.add('hidden');
+            }, 10000);
+        } finally {
+            // Restore button state
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        }
+    });
+});
+</script>
+{% endblock %} 

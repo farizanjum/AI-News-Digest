@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AI News Digest</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}?v=admin.1">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Enhanced mobile-responsive admin styles */
+        .admin-container {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .admin-card {
+            backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .admin-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .action-btn {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+            min-height: 48px; /* Touch-friendly */
+        }
+        
+        .action-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .mobile-nav {
+            display: none;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .desktop-nav {
+                display: none;
+            }
+            .mobile-nav {
+                display: flex;
+            }
+            .admin-container {
+                padding: 1rem;
+            }
+            .chart-container {
+                height: 200px !important;
+            }
+            .table-container {
+                font-size: 0.875rem;
+            }
+            .mobile-stack {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+        
+        /* Smooth animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Enhanced scrollbar for desktop */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.5);
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 min-h-screen text-white admin-container">
+    <!-- Fixed Background -->
+    <div class="fixed inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+
+    <!-- Enhanced Header -->
+    <header class="backdrop-blur-lg bg-white/10 border-b border-white/20 sticky top-0 z-50 shadow-xl">
+        <nav class="container mx-auto px-4 py-3 md:py-4">
+            <!-- Desktop Navigation -->
+            <div class="desktop-nav flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-white">Admin Dashboard</h1>
+                        <p class="text-sm text-gray-400 hidden md:block">AI News Digest Management</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="refreshBtn" class="action-btn px-4 py-2 rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                    <a href="/" class="action-btn px-4 py-2 rounded-lg transition-colors">
+                        <span class="hidden md:inline">View Site</span>
+                        <svg class="w-4 h-4 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                    <button id="logoutBtn" class="action-btn px-4 py-2 rounded-lg transition-colors bg-red-600/20 border-red-500/30 hover:bg-red-600/30">
+                        <span class="hidden md:inline">Logout</span>
+                        <svg class="w-4 h-4 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div class="mobile-nav flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-lg font-bold text-white">Admin</h1>
+                </div>
+                <div class="mobile-stack flex space-x-2">
+                    <button id="refreshBtnMobile" class="action-btn p-2 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                    <button id="menuToggle" class="action-btn p-2 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden mt-4 pb-4 border-t border-white/10">
+                <div class="flex flex-col space-y-3 pt-4">
+                    <a href="/" class="action-btn p-3 rounded-lg text-center">View Site</a>
+                    <button id="logoutBtnMobile" class="action-btn p-3 rounded-lg bg-red-600/20 border-red-500/30">Logout</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-2 md:px-4 py-4 md:py-8 relative z-10 custom-scrollbar">
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-12 fade-in">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-400">Loading dashboard...</p>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboardContent" class="hidden space-y-6 md:space-y-8 fade-in">
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+                <div class="admin-card stats-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-2 md:mb-0">
+                            <p class="text-gray-400 text-xs md:text-sm">Total</p>
+                            <p id="totalSubscribers" class="text-lg md:text-2xl font-bold text-white">-</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-12 md:h-12 bg-blue-500/20 rounded-full flex items-center justify-center ml-auto md:ml-0">
+                            <svg class="w-4 h-4 md:w-6 md:h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card stats-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-2 md:mb-0">
+                            <p class="text-gray-400 text-xs md:text-sm">Tech</p>
+                            <p id="techSubscribers" class="text-lg md:text-2xl font-bold text-blue-400">-</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-12 md:h-12 bg-blue-500/20 rounded-full flex items-center justify-center ml-auto md:ml-0">
+                            <svg class="w-4 h-4 md:w-6 md:h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card stats-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-2 md:mb-0">
+                            <p class="text-gray-400 text-xs md:text-sm">UPSC</p>
+                            <p id="upscSubscribers" class="text-lg md:text-2xl font-bold text-green-400">-</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-12 md:h-12 bg-green-500/20 rounded-full flex items-center justify-center ml-auto md:ml-0">
+                            <svg class="w-4 h-4 md:w-6 md:h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card stats-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-2 md:mb-0">
+                            <p class="text-gray-400 text-xs md:text-sm">Today</p>
+                            <p id="emailsToday" class="text-lg md:text-2xl font-bold text-purple-400">-</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-12 md:h-12 bg-purple-500/20 rounded-full flex items-center justify-center ml-auto md:ml-0">
+                            <svg class="w-4 h-4 md:w-6 md:h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 7.89a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Activity Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="admin-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Subscriber Distribution</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="subscriberChart" width="400" height="250"></canvas>
+                    </div>
+                </div>
+                <div class="admin-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <h3 class="text-lg font-semibold mb-4 text-white">System Status</h3>
+                    <div id="systemStatus" class="space-y-4">
+                        <div class="flex justify-between items-center p-3 rounded-lg bg-white/5">
+                            <span class="text-gray-300">News Scraper</span>
+                            <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-lg bg-white/5">
+                            <span class="text-gray-300">Email Service</span>
+                            <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-lg bg-white/5">
+                            <span class="text-gray-300">Database</span>
+                            <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-lg bg-white/5">
+                            <span class="text-gray-300">AI Service</span>
+                            <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div class="admin-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Send Test Digest</h3>
+                    <div class="space-y-3">
+                        <button id="sendTechTest" class="action-btn w-full py-3 px-4 rounded-lg font-medium">
+                            Send Tech Digest
+                        </button>
+                        <button id="sendUpscTest" class="action-btn w-full py-3 px-4 rounded-lg font-medium bg-green-600/15 border-green-500/30 hover:bg-green-600/25">
+                            Send UPSC Digest
+                        </button>
+                        <button id="sendBothTest" class="action-btn w-full py-3 px-4 rounded-lg font-medium bg-purple-600/15 border-purple-500/30 hover:bg-purple-600/25">
+                            Send Both Digests
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <button id="exportSubscribers" class="action-btn w-full py-3 px-4 rounded-lg font-medium bg-gray-600/15 border-gray-500/30 hover:bg-gray-600/25">
+                            Export Subscribers
+                        </button>
+                        <button id="viewLogs" class="action-btn w-full py-3 px-4 rounded-lg font-medium bg-yellow-600/15 border-yellow-500/30 hover:bg-yellow-600/25">
+                            View Email Logs
+                        </button>
+                        <button id="systemHealth" class="action-btn w-full py-3 px-4 rounded-lg font-medium bg-cyan-600/15 border-cyan-500/30 hover:bg-cyan-600/25">
+                            System Health
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Performance</h3>
+                    <div id="performanceMetrics" class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 text-sm">CPU Usage</span>
+                            <span id="cpuUsage" class="text-white font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 text-sm">Memory</span>
+                            <span id="memoryUsage" class="text-white font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 text-sm">Uptime</span>
+                            <span id="uptime" class="text-green-400 font-medium">Online</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Subscribers Table -->
+            <div class="admin-card p-4 md:p-6 rounded-xl md:rounded-2xl">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
+                    <h3 class="text-lg font-semibold text-white">Recent Subscribers</h3>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
+                        <input type="text" id="searchSubscribers" placeholder="Search subscribers..." 
+                               class="px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white text-sm flex-1 md:w-auto">
+                        <button id="loadAllSubscribers" class="action-btn px-4 py-2 rounded-lg text-sm font-medium">
+                            Load All
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto table-container">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-600/50">
+                                <th class="text-left py-3 px-2 md:px-4 text-gray-400">Name</th>
+                                <th class="text-left py-3 px-2 md:px-4 text-gray-400 hidden md:table-cell">Email</th>
+                                <th class="text-left py-3 px-2 md:px-4 text-gray-400">Type</th>
+                                <th class="text-left py-3 px-2 md:px-4 text-gray-400 hidden lg:table-cell">Joined</th>
+                                <th class="text-left py-3 px-2 md:px-4 text-gray-400">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subscribersTable" class="divide-y divide-gray-700/50">
+                            <!-- Subscribers will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        // Enhanced admin dashboard functionality with improved debugging
+        console.log('🚀 Admin Dashboard Script Loading...');
+        
+        const adminKey = sessionStorage.getItem('adminKey');
+        let refreshInterval;
+        
+        console.log('🔑 Admin key from sessionStorage:', adminKey ? `${adminKey.substring(0, 10)}...` : 'MISSING');
+        
+        if (!adminKey) {
+            console.error('❌ No admin key found, redirecting to login');
+            window.location.href = '/admin/login';
+        }
+
+        // Mobile menu toggle
+        document.getElementById('menuToggle')?.addEventListener('click', () => {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Enhanced dashboard data loading with better debugging
+        async function loadDashboardData() {
+            console.log('📊 Starting dashboard data load...');
+            
+            const maxRetries = 3;
+            let retryCount = 0;
+            
+            async function attemptLoad() {
+                try {
+                    console.log(`🔄 Loading dashboard data (attempt ${retryCount + 1}/${maxRetries})`);
+                    
+                    // Show loading state
+                    document.getElementById('loadingState')?.classList.remove('hidden');
+                    document.getElementById('dashboardContent')?.classList.add('hidden');
+                    
+                    // Load stats first
+                    console.log('📈 Loading stats...');
+                    const statsResponse = await apiCall('/api/stats');
+                    const stats = await statsResponse.json();
+                    console.log('✅ Stats loaded:', stats);
+                    
+                    // Load subscribers
+                    console.log('👥 Loading subscribers...');
+                    const subscribersResponse = await apiCall('/subscribers?limit=10');
+                    const subscribers = await subscribersResponse.json();
+                    console.log('✅ Subscribers loaded:', subscribers.length, 'items');
+                    
+                    // Update UI with animation
+                    console.log('🎨 Updating UI...');
+                    updateStatsWithAnimation(stats);
+                    
+                    // Create enhanced chart
+                    try {
+                        createEnhancedChart(stats);
+                        console.log('✅ Chart created');
+                    } catch (chartError) {
+                        console.warn('⚠️ Chart creation failed:', chartError);
+                    }
+                    
+                    // Load subscribers table
+                    loadSubscribersTable(subscribers);
+                    console.log('✅ Subscribers table loaded');
+                    
+                    // Load system health (non-blocking)
+                    loadSystemHealth().catch(err => console.warn('System health check failed:', err));
+                    
+                    // Show dashboard with fade-in
+                    document.getElementById('loadingState')?.classList.add('hidden');
+                    document.getElementById('dashboardContent')?.classList.remove('hidden');
+                    
+                    console.log('🎉 Dashboard loaded successfully!');
+                    showMessage('Dashboard loaded successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error(`❌ Dashboard loading attempt ${retryCount + 1} failed:`, error);
+                    
+                    if (error.message === 'Request timeout') {
+                        showMessage('Loading timeout. Retrying...', 'error');
+                    } else if (error.message && error.message.includes('401')) {
+                        console.error('🔒 Authentication failed, redirecting to login');
+                        sessionStorage.removeItem('adminKey');
+                        window.location.href = '/admin/login';
+                        return;
+                    }
+                    
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        const delay = retryCount * 2;
+                        console.log(`🔄 Retrying in ${delay} seconds...`);
+                        showMessage(`Loading failed. Retrying in ${delay} seconds...`, 'error');
+                        setTimeout(attemptLoad, delay * 1000);
+                    } else {
+                        console.error('💥 All attempts failed, showing basic dashboard');
+                        showBasicDashboard();
+                        showMessage('Dashboard loaded with limited functionality. Try refreshing the page.', 'error');
+                    }
+                }
+            }
+            
+            await attemptLoad();
+        }
+
+        // Basic dashboard for when full loading fails
+        function showBasicDashboard() {
+            console.log('📋 Loading basic dashboard (fallback mode)');
+            
+            // Show basic stats
+            document.getElementById('totalSubscribers').textContent = '-';
+            document.getElementById('techSubscribers').textContent = '-';
+            document.getElementById('upscSubscribers').textContent = '-';
+            document.getElementById('emailsToday').textContent = '-';
+            
+            // Show message in table
+            const tbody = document.getElementById('subscribersTable');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-8 text-gray-400">
+                            <div class="space-y-2">
+                                <p>Unable to load data. Please refresh the page.</p>
+                                <button onclick="loadDashboardData()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    🔄 Retry Loading
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            // Show dashboard
+            document.getElementById('loadingState')?.classList.add('hidden');
+            document.getElementById('dashboardContent')?.classList.remove('hidden');
+        }
+
+        // Enhanced API helper function with better debugging
+        async function apiCall(endpoint, options = {}) {
+            const headers = {
+                'X-Admin-Key': adminKey,
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            try {
+                console.log(`🌐 API Call: ${endpoint}`);
+                console.log(`🔑 Using admin key: ${adminKey ? adminKey.substring(0, 10) + '...' : 'MISSING'}`);
+                
+                const response = await fetch(endpoint, {
+                    ...options,
+                    headers,
+                    signal: AbortSignal.timeout(8000) // 8 second timeout
+                });
+                
+                console.log(`📡 API Response: ${endpoint} - Status: ${response.status}`);
+                
+                if (response.status === 401) {
+                    console.error('🔒 Authentication failed');
+                    sessionStorage.removeItem('adminKey');
+                    window.location.href = '/admin/login';
+                    return;
+                }
+                
+                if (response.status === 429) {
+                    const errorData = await response.text();
+                    throw new Error(`Rate limited: ${errorData}`);
+                }
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`❌ API Error: ${response.status} - ${errorText}`);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                return response;
+            } catch (error) {
+                console.error(`💥 API call to ${endpoint} failed:`, error);
+                
+                if (error.name === 'AbortError' || error.message.includes('timeout')) {
+                    throw new Error('Request timeout');
+                }
+                
+                if (error.message.includes('Failed to fetch')) {
+                    throw new Error('Network error. Please check your connection.');
+                }
+                
+                throw error;
+            }
+        }
+
+        // Animated stats update
+        function updateStatsWithAnimation(stats) {
+            console.log('🎯 Updating stats with animation:', stats);
+            
+            const elements = [
+                { id: 'totalSubscribers', value: stats.total_subscribers },
+                { id: 'techSubscribers', value: stats.tech_subscribers },
+                { id: 'upscSubscribers', value: stats.upsc_subscribers },
+                { id: 'emailsToday', value: stats.emails_sent_today }
+            ];
+
+            elements.forEach(({ id, value }) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    console.log(`📊 Animating ${id}: ${value}`);
+                    animateNumber(element, parseInt(element.textContent) || 0, value, 1000);
+                } else {
+                    console.warn(`⚠️ Element not found: ${id}`);
+                }
+            });
+        }
+
+        // Number animation function
+        function animateNumber(element, start, end, duration) {
+            const range = end - start;
+            const startTime = performance.now();
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.round(start + (range * progress));
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+
+        // Enhanced chart creation
+        function createEnhancedChart(stats) {
+            const ctx = document.getElementById('subscriberChart');
+            if (!ctx) return;
+            
+            // Destroy existing chart if exists
+            if (window.subscriberChart) {
+                window.subscriberChart.destroy();
+            }
+            
+            const bothCount = Math.max(0, stats.total_subscribers - stats.tech_subscribers - stats.upsc_subscribers);
+            const techOnlyCount = Math.max(0, stats.tech_subscribers - bothCount);
+            const upscOnlyCount = Math.max(0, stats.upsc_subscribers - bothCount);
+            
+            window.subscriberChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Tech Only', 'UPSC Only', 'Both'],
+                    datasets: [{
+                        data: [techOnlyCount, upscOnlyCount, bothCount],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(139, 92, 246, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(139, 92, 246, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#D1D5DB',
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Enhanced subscribers table
+        function loadSubscribersTable(subscribers) {
+            const tbody = document.getElementById('subscribersTable');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            subscribers.forEach((subscriber, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-800/30 transition-colors duration-200';
+                row.style.animationDelay = `${index * 100}ms`;
+                row.innerHTML = `
+                    <td class="py-3 px-2 md:px-4 text-white font-medium">${subscriber.name}</td>
+                    <td class="py-3 px-2 md:px-4 text-gray-300 hidden md:table-cell">
+                        <span class="truncate block max-w-xs">${subscriber.email}</span>
+                    </td>
+                    <td class="py-3 px-2 md:px-4">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                            subscriber.digest_type === 'tech' ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30' :
+                            subscriber.digest_type === 'upsc' ? 'bg-green-600/20 text-green-300 border border-green-500/30' :
+                            'bg-purple-600/20 text-purple-300 border border-purple-500/30'
+                        }">${subscriber.digest_type.toUpperCase()}</span>
+                    </td>
+                    <td class="py-3 px-2 md:px-4 text-gray-400 text-xs hidden lg:table-cell">
+                        ${new Date(subscriber.created_at).toLocaleDateString()}
+                    </td>
+                    <td class="py-3 px-2 md:px-4">
+                        <div class="flex items-center">
+                            <span class="w-2 h-2 rounded-full ${subscriber.is_active ? 'bg-green-500' : 'bg-red-500'} mr-2"></span>
+                            <span class="text-xs ${subscriber.is_active ? 'text-green-400' : 'text-red-400'}">
+                                ${subscriber.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // System health monitoring
+        async function loadSystemHealth() {
+            try {
+                const response = await apiCall('/api/system-health');
+                const health = await response.json();
+                
+                if (health.system && health.system !== 'monitoring_unavailable') {
+                    document.getElementById('cpuUsage').textContent = `${health.system.cpu_percent}%`;
+                    document.getElementById('memoryUsage').textContent = `${health.system.memory_percent}%`;
+                }
+            } catch (error) {
+                console.error('Error loading system health:', error);
+            }
+        }
+
+        // Event listeners setup
+        function setupEventListeners() {
+            // Refresh buttons
+            ['refreshBtn', 'refreshBtnMobile'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', loadDashboardData);
+            });
+            
+            // Logout buttons
+            ['logoutBtn', 'logoutBtnMobile'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', () => {
+                    sessionStorage.removeItem('adminKey');
+                    window.location.href = '/admin/login';
+                });
+            });
+
+            // Test digest buttons
+            document.getElementById('sendTechTest')?.addEventListener('click', () => sendTestDigest('tech'));
+            document.getElementById('sendUpscTest')?.addEventListener('click', () => sendTestDigest('upsc'));
+            document.getElementById('sendBothTest')?.addEventListener('click', () => sendTestDigest('both'));
+
+            // Quick action buttons
+            document.getElementById('exportSubscribers')?.addEventListener('click', exportSubscribers);
+            document.getElementById('viewLogs')?.addEventListener('click', viewEmailLogs);
+            document.getElementById('systemHealth')?.addEventListener('click', checkSystemHealth);
+            document.getElementById('loadAllSubscribers')?.addEventListener('click', loadAllSubscribers);
+
+            // Search functionality
+            document.getElementById('searchSubscribers')?.addEventListener('input', debounce(searchSubscribers, 300));
+        }
+
+        // Utility functions
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        async function sendTestDigest(type) {
+            try {
+                const button = document.getElementById(`send${type.charAt(0).toUpperCase() + type.slice(1)}Test`);
+                const originalText = button.textContent;
+                button.textContent = 'Sending...';
+                button.disabled = true;
+
+                await apiCall(`/api/digest/send-test?digest_type=${type}`, { method: 'POST' });
+                showMessage(`${type.toUpperCase()} digest sent successfully!`);
+                
+                button.textContent = originalText;
+                button.disabled = false;
+            } catch (error) {
+                showMessage(`Error sending ${type} digest`, 'error');
+                const button = document.getElementById(`send${type.charAt(0).toUpperCase() + type.slice(1)}Test`);
+                button.textContent = button.textContent.replace('Sending...', 'Send ' + type.charAt(0).toUpperCase() + type.slice(1) + ' Digest');
+                button.disabled = false;
+            }
+        }
+
+        async function exportSubscribers() {
+            try {
+                const response = await apiCall('/api/export/subscribers');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `subscribers_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showMessage('Subscribers exported successfully!');
+            } catch (error) {
+                showMessage('Error exporting subscribers', 'error');
+            }
+        }
+
+        async function viewEmailLogs() {
+            try {
+                const response = await apiCall('/api/email-logs');
+                const logs = await response.json();
+                // Here you could open a modal or new page with logs
+                showMessage(`Found ${logs.length} email logs`);
+            } catch (error) {
+                showMessage('Error fetching email logs', 'error');
+            }
+        }
+
+        async function checkSystemHealth() {
+            try {
+                await loadSystemHealth();
+                showMessage('System health updated');
+            } catch (error) {
+                showMessage('Error checking system health', 'error');
+            }
+        }
+
+        async function loadAllSubscribers() {
+            try {
+                const response = await apiCall('/subscribers?limit=100');
+                const subscribers = await response.json();
+                loadSubscribersTable(subscribers);
+                showMessage(`Loaded ${subscribers.length} subscribers`);
+            } catch (error) {
+                showMessage('Error loading subscribers', 'error');
+            }
+        }
+
+        function searchSubscribers(event) {
+            const searchTerm = event.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#subscribersTable tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const isVisible = text.includes(searchTerm);
+                row.style.display = isVisible ? '' : 'none';
+            });
+        }
+
+        // Auto-refresh functionality
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                loadDashboardData();
+            }, 300000); // Refresh every 5 minutes
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            loadDashboardData();
+            startAutoRefresh();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', stopAutoRefresh);
+
+        // Enhanced message system
+        function showMessage(message, type = 'success') {
+            const messageContainer = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            
+            const baseClasses = 'p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-0';
+            const typeClasses = type === 'success' 
+                ? 'bg-green-600/20 border border-green-500/50 text-green-300' 
+                : 'bg-red-600/20 border border-red-500/50 text-red-300';
+            
+            messageDiv.className = `${baseClasses} ${typeClasses}`;
+            messageDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-400 hover:text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            messageContainer.appendChild(messageDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.style.transform = 'translateX(100%)';
+                    setTimeout(() => messageDiv.remove(), 300);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 

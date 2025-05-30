@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to AI News Digest</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f0f2f5;
+            padding: 40px 0;
+        }
+        .main {
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #1a1a1a;
+            padding: 30px 20px;
+            text-align: center;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+        .header h1 {
+            color: #00ffff;
+            margin: 0;
+            font-size: 32px;
+            font-weight: 800;
+        }
+        .content {
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .welcome-text {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 16px;
+            color: #333333;
+            margin-bottom: 30px;
+        }
+        .preferences {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .preferences h3 {
+            color: #1a1a1a;
+            margin-top: 0;
+        }
+        .footer {
+            background-color: #1a1a1a;
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+        .footer p {
+            color: #bbbbbb;
+            margin: 0;
+            font-size: 13px;
+        }
+        .footer a {
+            color: #bbbbbb;
+            text-decoration: underline;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px;
+            font-weight: 600;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <center class="wrapper">
+        <table class="main" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+            <tr>
+                <td class="header">
+                    <h1>Welcome to AI News Digest!</h1>
+                </td>
+            </tr>
+            <tr>
+                <td class="content">
+                    <p class="welcome-text">Hello {{name}},</p>
+                    <p class="message">
+                        Thank you for subscribing to AI News Digest! We're excited to have you join our community of tech enthusiasts.
+                        You'll start receiving daily curated technology news updates in your inbox.
+                    </p>
+                    <div class="preferences">
+                        <h3>Your Preferences</h3>
+                        <p>You've selected to receive news about: <strong>{{preferences}}</strong></p>
+                        <p>Our AI will curate the most relevant news based on your preferences and deliver it to your inbox daily.</p>
+                    </div>
+                    <p class="message">
+                        Your first digest will arrive tomorrow morning. Stay tuned for the latest in technology news!
+                    </p>
+                    <a href="{{preferences_url}}" class="button">Manage Preferences</a>
+                </td>
+            </tr>
+            <tr>
+                <td class="footer">
+                    <p>Delivered by your autonomous news agent.</p>
+                    <p style="margin-top: 10px;">
+                        <a href="{{unsubscribe_url}}">Unsubscribe</a> | <a href="{{preferences_url}}">Manage Preferences</a>
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html> 
