@@ -2,17 +2,18 @@
     "version": 2,
     "builds": [
         {
-            "src": "api/index.py",
+            "src": "main.py",
             "use": "@vercel/python",
             "config": {
-                "runtime": "python3.8"
+                "runtime": "python3.8",
+                "includeFiles": ["templates/**", "static/**", "database/**", "services/**", "api/**"]
             }
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "api/index.py"
+            "dest": "main.py"
         }
     ]
 } 
