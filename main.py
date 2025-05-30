@@ -5,7 +5,6 @@ import hmac
 import secrets
 import logging
 from urllib.parse import unquote
-import asyncio
 
 # Load environment variables
 load_dotenv()
@@ -14,7 +13,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-logger.info(f"🚀 Starting AI News Digest Platform with Supabase...")
+logger.info(f"🚀 Starting AI News Digest Platform with Supabase PostgreSQL...")
 
 from fastapi import FastAPI, Depends, HTTPException, Request, Form, Query, BackgroundTasks, Header
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
@@ -47,15 +46,15 @@ except Exception as e:
 templates = Jinja2Templates(directory="templates")
 logger.info("✅ Templates initialized")
 
-# Import Supabase client
-from database.supabase_client import supabase_client
+# Import Supabase manager
+from database.supabase_client import supabase_manager, supabase
 
 # Global flags
 DATABASE_AVAILABLE = False
 
 # Security configuration
-ADMIN_API_KEY = "AlP6rApaPAqjFyaEWqXm4L_pF1yR5lg__YRSsRMwLOU"
-UNSUBSCRIBE_SECRET = "7x2s9OV5X3Z60WXTsWYirwf_1Iq9H_ngZAxwPCXmeGo"
+ADMIN_API_KEY = os.getenv('ADMIN_API_KEY', "AlP6rApaPAqjFyaEWqXm4L_pF1yR5lg__YRSsRMwLOU")
+UNSUBSCRIBE_SECRET = os.getenv('UNSUBSCRIBE_SECRET', "7x2s9OV5X3Z60WXTsWYirwf_1Iq9H_ngZAxwPCXmeGo")
 
 # Email configuration
 SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
@@ -190,42 +189,50 @@ class ContactForm(BaseModel):
 class UnsubscribeTokenRequest(BaseModel):
     email: EmailStr
 
-# Initialize database on startup
+# Initialize Supabase on startup
 @app.on_event("startup")
 async def startup_event():
     global DATABASE_AVAILABLE
-    logger.info("🚀 AI News Digest starting up with Supabase...")
+    logger.info("🚀 AI News Digest starting up with Supabase PostgreSQL...")
     
     try:
-        # Initialize Supabase
-        success = await supabase_client.init_pool()
+        # Initialize Supabase with async
+        success = await supabase_manager.initialize()
         if success:
-            await supabase_client.create_tables()
+            await supabase_manager.ensure_tables_exist()
             DATABASE_AVAILABLE = True
-            logger.info("✅ Supabase database initialized successfully")
+            logger.info("✅ Supabase PostgreSQL initialized successfully")
+            
+            # Test connection
+            test_result = await supabase_manager.test_connection()
+            logger.info(f"📊 Connection test: {test_result}")
         else:
             logger.error("❌ Failed to initialize Supabase")
     except Exception as e:
-        logger.error(f"❌ Database initialization error: {e}")
+        logger.error(f"❌ Supabase initialization error: {e}")
     
     logger.info("✅ Startup complete!")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await supabase_client.close()
+    await supabase_manager.close()
 
 # Health check endpoint
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
+    connection_test = supabase.test_connection() if DATABASE_AVAILABLE else {"connected": False}
+    
     return {
         "status": "healthy",
         "database_available": DATABASE_AVAILABLE,
+        "database_connected": connection_test.get("connected", False),
+        "subscriber_count": connection_test.get("subscriber_count", 0),
         "admin_configured": bool(ADMIN_API_KEY),
         "email_configured": bool(SENDER_EMAIL and SENDER_PASSWORD),
         "environment": "serverless" if os.getenv("VERCEL") else "local",
-        "message": "🚀 AI News Digest Platform is running with Supabase!",
-        "version": "3.0.0"
+        "message": "🚀 AI News Digest Platform is running with Supabase PostgreSQL!",
+        "version": "3.2.0"
     }
 
 # Main routes
@@ -251,10 +258,13 @@ async def create_subscriber(
         raise HTTPException(status_code=503, detail="Database service unavailable")
     
     try:
-        result = await supabase_client.add_subscriber(email, name, preferences, digest_type)
+        result = supabase.add_subscriber(email, name, preferences, digest_type)
         
-        if result["status"] == "exists":
-            raise HTTPException(status_code=400, detail="Email already subscribed")
+        if not result["success"]:
+            if "already subscribed" in result.get("error", ""):
+                raise HTTPException(status_code=400, detail="Email already subscribed")
+            else:
+                raise HTTPException(status_code=500, detail=result.get("error", "Subscription failed"))
         
         # Send welcome email
         if SENDER_EMAIL and SENDER_PASSWORD:
@@ -272,7 +282,7 @@ async def create_subscriber(
                         <p>Hi {name},</p>
                         <p>Thank you for subscribing to our {digest_type.title()} digest!</p>
                         <p>You'll receive your personalized news digest daily at 8:00 PM.</p>
-                        <p>Your preferences: {preferences}</p>
+                        <p><strong>Your preferences:</strong> {preferences}</p>
                         <hr style="margin: 30px 0; border: 1px solid rgba(255,255,255,0.3);">
                         <p style="font-size: 14px; opacity: 0.8;">
                             You can unsubscribe anytime by replying to any digest email.
@@ -289,10 +299,10 @@ async def create_subscriber(
                     server.login(SENDER_EMAIL, SENDER_PASSWORD)
                     server.send_message(msg)
                 
-                await supabase_client.log_email(email, "welcome", "Welcome to AI News Digest! 🚀", "sent")
+                supabase.log_email(email, "welcome", "Welcome to AI News Digest! 🚀", "sent")
             except Exception as e:
                 logger.warning(f"Could not send welcome email: {e}")
-                await supabase_client.log_email(email, "welcome", "Welcome to AI News Digest! 🚀", "failed", str(e))
+                supabase.log_email(email, "welcome", "Welcome to AI News Digest! 🚀", "failed", str(e))
         
         return RedirectResponse(url="/?subscribed=true", status_code=303)
         
@@ -320,7 +330,7 @@ async def submit_contact(
         
         # Save to database
         if DATABASE_AVAILABLE:
-            await supabase_client.add_contact_message(name, email, subject, message)
+            supabase.add_contact_message(name, email, subject, message)
         
         # Send email notification
         if SENDER_EMAIL and SENDER_PASSWORD:
@@ -361,8 +371,8 @@ async def get_stats(request: Request, admin: bool = Depends(verify_admin_key)):
     """Get platform statistics."""
     try:
         if DATABASE_AVAILABLE:
-            stats = await supabase_client.get_subscriber_stats()
-            stats["emails_sent_today"] = 0  # TODO: Implement from email_logs
+            stats = supabase.get_subscriber_stats()
+            stats["emails_sent_today"] = len(supabase.get_email_logs(100))  # Simple count for now
             stats["status"] = "operational"
             return stats
         
@@ -371,7 +381,7 @@ async def get_stats(request: Request, admin: bool = Depends(verify_admin_key)):
             "tech_subscribers": 0,
             "upsc_subscribers": 0,
             "emails_sent_today": 0,
-            "status": "limited_mode"
+            "status": "database_unavailable"
         }
     except Exception as e:
         logger.error(f"Stats error: {e}")
@@ -410,7 +420,7 @@ async def generate_unsubscribe_token_api(request: UnsubscribeTokenRequest):
     if not DATABASE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Database service unavailable")
     
-    subscribers = await supabase_client.get_subscribers()
+    subscribers = supabase.get_subscribers()
     subscriber_emails = [s['email'] for s in subscribers]
     
     if request.email not in subscriber_emails:
@@ -425,7 +435,7 @@ async def unsubscribe_page(request: Request, email: str = Query(...), token: str
     if not verify_unsubscribe_token(email, token):
         raise HTTPException(status_code=400, detail="Invalid unsubscribe link")
     
-    success = await supabase_client.unsubscribe_user(email)
+    success = supabase.unsubscribe_user(email)
     return templates.TemplateResponse("unsubscribe.html", {
         "request": request, 
         "email": email, 
