@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Unsubscribe - AI News Digest{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+        <div class="glass p-8 rounded-2xl text-center">
+            {% if success %}
+                <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold mb-4 text-white">Successfully Unsubscribed 😢</h1>
+                <p class="text-gray-300 mb-6">
+                    We're sorry to see you go! You have been successfully unsubscribed from our AI News Digest.
+                </p>
+                <p class="text-sm text-gray-400 mb-6">
+                    Email: {{ email }}
+                </p>
+            {% else %}
+                <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold mb-4 text-white">Unsubscribe Failed ❌</h1>
+                <p class="text-gray-300 mb-6">
+                    We encountered an error while processing your unsubscribe request. Please try again or contact us.
+                </p>
+            {% endif %}
+            
+            <div class="space-y-4">
+                <a href="/" class="btn-modern w-full inline-block">
+                    🏠 Back to Homepage
+                </a>
+                <a href="/contact" class="btn-secondary w-full inline-block">
+                    📧 Contact Support
+                </a>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-600">
+                <p class="text-xs text-gray-500">
+                    Changed your mind? You can always <a href="/subscribe" class="text-blue-400 hover:underline">subscribe again</a> anytime.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

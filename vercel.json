@@ -15,5 +15,11 @@
             "src": "/(.*)",
             "dest": "main.py"
         }
-    ]
+    ],
+    "env": {
+        "DATABASE_URL": "postgresql://postgres:1Don%27tknow%40@db.wlkzjcgdkqrvgvwdvvec.supabase.co:5432/postgres",
+        "ADMIN_API_KEY": "AlP6rApaPAqjFyaEWqXm4L_pF1yR5lg__YRSsRMwLOU",
+        "UNSUBSCRIBE_SECRET": "7x2s9OV5X3Z60WXTsWYirwf_1Iq9H_ngZAxwPCXmeGo",
+        "SENDER_EMAIL": "subscribe.ainewsdigest@gmail.com"
+    }
 } 

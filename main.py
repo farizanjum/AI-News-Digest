@@ -5,18 +5,21 @@ import hmac
 import secrets
 import logging
 from urllib.parse import unquote
+import asyncio
 
 # Load environment variables
 load_dotenv()
 
-# Configure logging for serverless
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-logger.info(f"🚀 Starting AI News Digest Platform...")
+logger.info(f"🚀 Starting AI News Digest Platform with Supabase...")
 
 from fastapi import FastAPI, Depends, HTTPException, Request, Form, Query, BackgroundTasks, Header
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr, validator
 from datetime import datetime
@@ -25,81 +28,40 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import requests
 import json
-import urllib.parse
-import asyncio
 import html
 import re
 import time
 from collections import defaultdict
 
-# Initialize FastAPI app first
+# Initialize FastAPI app
 app = FastAPI(title="AI News Digest Platform", description="Autonomous News Digest with AI Curation")
+
+# Mount static files
+try:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    logger.info("✅ Static files mounted")
+except Exception as e:
+    logger.warning(f"⚠️ Static files not available: {e}")
+
+# Initialize templates
+templates = Jinja2Templates(directory="templates")
+logger.info("✅ Templates initialized")
+
+# Import Supabase client
+from database.supabase_client import supabase_client
 
 # Global flags
 DATABASE_AVAILABLE = False
-SERVICES_AVAILABLE = False
-
-# Check database availability
-def check_database():
-    global DATABASE_AVAILABLE
-    try:
-        from sqlalchemy.orm import Session
-        from sqlalchemy import create_engine
-        import database.models as models
-        from database.models import Base
-        from database.database import get_db, create_tables, init_database
-        
-        # Use PostgreSQL if DATABASE_URL is provided, otherwise SQLite
-        db_url = os.getenv('DATABASE_URL', 'sqlite:///./news_digest.db')
-        engine = create_engine(db_url)
-        Base.metadata.create_all(bind=engine)
-        create_tables()
-        init_database()
-        DATABASE_AVAILABLE = True
-        logger.info("✅ Database initialized successfully")
-        return True
-    except Exception as e:
-        logger.error(f"❌ Database not available: {e}")
-        DATABASE_AVAILABLE = False
-        return False
-
-# Check services availability
-def check_services():
-    global SERVICES_AVAILABLE
-    try:
-        from services.email_service import EmailService
-        from services.news_service import NewsService
-        SERVICES_AVAILABLE = True
-        logger.info("✅ Services available")
-        return True
-    except Exception as e:
-        logger.error(f"⚠️ Services not available: {e}")
-        SERVICES_AVAILABLE = False
-        return False
-
-# Lazy initialization
-def get_db_session():
-    if not DATABASE_AVAILABLE:
-        return None
-    try:
-        from database.database import SessionLocal
-        return SessionLocal()
-    except:
-        return None
-
-def get_db():
-    db = get_db_session()
-    if db:
-        try:
-            yield db
-        finally:
-            db.close()
-    else:
-        yield None
 
 # Security configuration
-ADMIN_API_KEY = os.getenv('ADMIN_API_KEY')
-UNSUBSCRIBE_SECRET = os.getenv('UNSUBSCRIBE_SECRET', secrets.token_urlsafe(32))
+ADMIN_API_KEY = "AlP6rApaPAqjFyaEWqXm4L_pF1yR5lg__YRSsRMwLOU"
+UNSUBSCRIBE_SECRET = "7x2s9OV5X3Z60WXTsWYirwf_1Iq9H_ngZAxwPCXmeGo"
+
+# Email configuration
+SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
+SENDER_EMAIL = os.getenv('SENDER_EMAIL', 'subscribe.ainewsdigest@gmail.com')
+SENDER_PASSWORD = os.getenv('SENDER_PASSWORD')
 
 # Security tracking
 failed_attempts = defaultdict(list)
@@ -178,38 +140,6 @@ def verify_unsubscribe_token(email: str, token: str) -> bool:
     expected_token = generate_unsubscribe_token(email)
     return hmac.compare_digest(expected_token, token)
 
-# Email configuration
-SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
-SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
-SENDER_EMAIL = os.getenv('SENDER_EMAIL')
-SENDER_PASSWORD = os.getenv('SENDER_PASSWORD')
-
-# Initialize services with error handling
-email_service = None
-news_service = None
-
-def get_email_service():
-    global email_service
-    if email_service is None and SERVICES_AVAILABLE:
-        try:
-            from services.email_service import EmailService
-            email_service = EmailService()
-            logger.info("✅ Email service initialized")
-        except Exception as e:
-            logger.error(f"❌ Email service initialization error: {e}")
-    return email_service
-
-def get_news_service():
-    global news_service
-    if news_service is None and SERVICES_AVAILABLE:
-        try:
-            from services.news_service import NewsService
-            news_service = NewsService()
-            logger.info("✅ News service initialized")
-        except Exception as e:
-            logger.error(f"❌ News service initialization error: {e}")
-    return news_service
-
 # Pydantic models
 class SubscriberCreate(BaseModel):
     email: EmailStr
@@ -227,11 +157,6 @@ class SubscriberResponse(BaseModel):
     
     class Config:
         from_attributes = True
-
-class PreferencesUpdate(BaseModel):
-    email: EmailStr
-    preferences: str
-    digest_type: str = "tech"
 
 class ContactForm(BaseModel):
     name: str
@@ -265,363 +190,145 @@ class ContactForm(BaseModel):
 class UnsubscribeTokenRequest(BaseModel):
     email: EmailStr
 
-# Initialize on startup
+# Initialize database on startup
 @app.on_event("startup")
 async def startup_event():
-    logger.info("🚀 AI News Digest starting up...")
-    check_database()
-    check_services()
+    global DATABASE_AVAILABLE
+    logger.info("🚀 AI News Digest starting up with Supabase...")
     
-    # Try to mount static files
     try:
-        from fastapi.staticfiles import StaticFiles
-        import os
-        if os.path.exists("static"):
-            app.mount("/static", StaticFiles(directory="static"), name="static")
-            logger.info("✅ Static files mounted")
+        # Initialize Supabase
+        success = await supabase_client.init_pool()
+        if success:
+            await supabase_client.create_tables()
+            DATABASE_AVAILABLE = True
+            logger.info("✅ Supabase database initialized successfully")
         else:
-            logger.warning("⚠️ Static directory not found")
+            logger.error("❌ Failed to initialize Supabase")
     except Exception as e:
-        logger.warning(f"⚠️ Static files not available: {e}")
-    
-    # Check if templates exist
-    if os.path.exists("templates"):
-        logger.info("✅ Templates directory found")
-    else:
-        logger.warning("⚠️ Templates directory not found")
+        logger.error(f"❌ Database initialization error: {e}")
     
     logger.info("✅ Startup complete!")
 
-# Template helper function
-def get_templates():
-    """Get Jinja2 templates with proper error handling."""
-    try:
-        from fastapi.templating import Jinja2Templates
-        import os
-        if os.path.exists("templates"):
-            return Jinja2Templates(directory="templates")
-        else:
-            logger.error("Templates directory not found")
-            return None
-    except Exception as e:
-        logger.error(f"Template initialization error: {e}")
-        return None
+@app.on_event("shutdown")
+async def shutdown_event():
+    await supabase_client.close()
 
 # Health check endpoint
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for debugging deployment."""
+    """Health check endpoint."""
     return {
         "status": "healthy",
         "database_available": DATABASE_AVAILABLE,
-        "services_available": SERVICES_AVAILABLE,
         "admin_configured": bool(ADMIN_API_KEY),
         "email_configured": bool(SENDER_EMAIL and SENDER_PASSWORD),
         "environment": "serverless" if os.getenv("VERCEL") else "local",
-        "message": "🚀 AI News Digest Platform is running!",
-        "version": "2.0.0"
+        "message": "🚀 AI News Digest Platform is running with Supabase!",
+        "version": "3.0.0"
     }
 
 # Main routes
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """Home page with beautiful template."""
-    templates = get_templates()
-    if templates:
-        try:
-            return templates.TemplateResponse("index.html", {"request": request})
-        except Exception as e:
-            logger.error(f"Template render error: {e}")
-    
-    # Fallback to beautiful HTML
-    return HTMLResponse("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>🤖 AI News Digest</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; }
-            .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-            .hero { text-align: center; padding: 80px 20px; }
-            .hero h1 { font-size: 3.5rem; font-weight: bold; margin-bottom: 20px; background: linear-gradient(45deg, #fff, #a8edea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-            .hero p { font-size: 1.3rem; margin-bottom: 40px; opacity: 0.9; }
-            .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin: 60px 0; }
-            .feature { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); text-align: center; transition: transform 0.3s; }
-            .feature:hover { transform: translateY(-10px); }
-            .feature-icon { font-size: 3rem; margin-bottom: 20px; }
-            .feature h3 { font-size: 1.5rem; margin-bottom: 15px; }
-            .btn { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; display: inline-block; margin: 10px; font-weight: bold; transition: transform 0.3s; font-size: 1.1rem; }
-            .btn:hover { transform: translateY(-3px); }
-            @media (max-width: 768px) { .hero h1 { font-size: 2.5rem; } .hero p { font-size: 1.1rem; } }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="hero">
-                <h1>🤖 AI News Digest</h1>
-                <p>Get personalized AI-curated news delivered to your inbox daily</p>
-                <div class="features">
-                    <div class="feature">
-                        <div class="feature-icon">🧠</div>
-                        <h3>AI-Powered Curation</h3>
-                        <p>Advanced AI analyzes thousands of articles to bring you only the most relevant news</p>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">📧</div>
-                        <h3>Daily Delivery</h3>
-                        <p>Receive your personalized digest every day at 8:00 PM</p>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">⚙️</div>
-                        <h3>Fully Customizable</h3>
-                        <p>Choose between Tech News, UPSC Updates, or both based on your interests</p>
-                    </div>
-                </div>
-                <a href="/subscribe" class="btn">🚀 Subscribe Now</a>
-                <a href="/admin/login" class="btn">🔐 Admin Login</a>
-                <a href="/contact" class="btn">📞 Contact Us</a>
-            </div>
-        </div>
-    </body>
-    </html>
-    """)
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/subscribe", response_class=HTMLResponse)
 async def subscribe_page(request: Request):
     """Subscribe page with beautiful template."""
-    templates = get_templates()
-    if templates:
-        try:
-            return templates.TemplateResponse("subscribe.html", {"request": request})
-        except Exception as e:
-            logger.error(f"Template render error: {e}")
-    
-    # Fallback subscription form
-    return HTMLResponse("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Subscribe - AI News Digest</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; padding: 20px; }
-            .container { max-width: 600px; margin: 50px auto; }
-            .form-container { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); }
-            .form-group { margin: 20px 0; }
-            label { display: block; margin-bottom: 8px; font-weight: bold; }
-            input, select, textarea { width: 100%; padding: 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.9); color: #333; font-size: 16px; }
-            button { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 15px 30px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 16px; }
-            button:hover { transform: translateY(-2px); }
-            .back-link { text-align: center; margin-top: 20px; }
-            .back-link a { color: white; text-decoration: none; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="form-container">
-                <h1>📧 Subscribe to AI News Digest</h1>
-                <p style="margin-bottom: 30px; opacity: 0.9;">Join thousands of professionals who stay informed with our AI-curated news digest.</p>
-                <form method="post" action="/subscribe">
-                    <div class="form-group">
-                        <label for="name">Your Name:</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Your Email:</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="digest_type">Choose Your Digest Type:</label>
-                        <select id="digest_type" name="digest_type" required>
-                            <option value="">Select digest type...</option>
-                            <option value="tech">Tech News Digest</option>
-                            <option value="upsc">UPSC Current Affairs</option>
-                            <option value="both">Both Digests</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="preferences">Your Interests (optional):</label>
-                        <input type="text" id="preferences" name="preferences" placeholder="e.g., AI, Machine Learning, Web Development" value="all">
-                    </div>
-                    <button type="submit">🚀 Subscribe Now</button>
-                </form>
-                <div class="back-link">
-                    <a href="/">← Back to Home</a>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """)
+    return templates.TemplateResponse("subscribe.html", {"request": request})
 
-@app.get("/contact", response_class=HTMLResponse)
-async def contact_page(request: Request):
-    """Contact page with beautiful template."""
-    templates = get_templates()
-    if templates:
-        try:
-            return templates.TemplateResponse("contact.html", {"request": request})
-        except Exception as e:
-            logger.error(f"Template render error: {e}")
-    
-    # Fallback contact form
-    return HTMLResponse("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Contact - AI News Digest</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; padding: 20px; }
-            .container { max-width: 600px; margin: 50px auto; }
-            .form-container { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); }
-            .form-group { margin: 20px 0; }
-            label { display: block; margin-bottom: 8px; font-weight: bold; }
-            input, textarea { width: 100%; padding: 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.9); color: #333; font-size: 16px; }
-            textarea { min-height: 120px; resize: vertical; }
-            button { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 15px 30px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 16px; }
-            button:hover { transform: translateY(-2px); }
-            .back-link { text-align: center; margin-top: 20px; }
-            .back-link a { color: white; text-decoration: none; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="form-container">
-                <h1>📞 Contact Us</h1>
-                <p style="margin-bottom: 30px; opacity: 0.9;">Have a question or feedback? We'd love to hear from you!</p>
-                <form method="post" action="/contact">
-                    <div class="form-group">
-                        <label for="name">Your Name:</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Your Email:</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="subject">Subject:</label>
-                        <input type="text" id="subject" name="subject" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Message:</label>
-                        <textarea id="message" name="message" required></textarea>
-                    </div>
-                    <button type="submit">📧 Send Message</button>
-                </form>
-                <div class="back-link">
-                    <a href="/">← Back to Home</a>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """)
-
-@app.post("/subscribe", response_model=SubscriberResponse)
-def create_subscriber(subscriber: SubscriberCreate, db = Depends(get_db)):
+@app.post("/subscribe")
+async def create_subscriber(
+    name: str = Form(...),
+    email: str = Form(...),
+    digest_type: str = Form(...),
+    preferences: str = Form(default="all")
+):
     """Create a new subscriber."""
-    if not DATABASE_AVAILABLE or not db:
+    if not DATABASE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Database service unavailable")
     
     try:
-        import database.models as models
+        result = await supabase_client.add_subscriber(email, name, preferences, digest_type)
         
-        # Check if email already exists
-        existing_subscriber = db.query(models.Subscriber).filter(models.Subscriber.email == subscriber.email).first()
-        if existing_subscriber:
-            if existing_subscriber.is_active:
-                raise HTTPException(status_code=400, detail="Email already subscribed")
-            else:
-                # Reactivate existing subscriber
-                existing_subscriber.is_active = True
-                existing_subscriber.name = subscriber.name
-                existing_subscriber.preferences = subscriber.preferences
-                existing_subscriber.digest_type = subscriber.digest_type
-                existing_subscriber.updated_at = datetime.now()
-                db.commit()
-                db.refresh(existing_subscriber)
-                
-                # Send welcome email
-                try:
-                    email_svc = get_email_service()
-                    if email_svc:
-                        email_svc.send_welcome_email(
-                            existing_subscriber.email, 
-                            existing_subscriber.name, 
-                            existing_subscriber.preferences,
-                            existing_subscriber.digest_type
-                        )
-                except Exception as e:
-                    logger.warning(f"Could not send welcome email: {e}")
-                
-                return existing_subscriber
-        
-        # Create new subscriber
-        db_subscriber = models.Subscriber(
-            email=subscriber.email,
-            name=subscriber.name,
-            preferences=subscriber.preferences,
-            digest_type=subscriber.digest_type,
-            is_active=True
-        )
-        db.add(db_subscriber)
-        db.commit()
-        db.refresh(db_subscriber)
+        if result["status"] == "exists":
+            raise HTTPException(status_code=400, detail="Email already subscribed")
         
         # Send welcome email
-        try:
-            email_svc = get_email_service()
-            if email_svc:
-                email_svc.send_welcome_email(
-                    db_subscriber.email, 
-                    db_subscriber.name, 
-                    db_subscriber.preferences,
-                    db_subscriber.digest_type
-                )
-        except Exception as e:
-            logger.warning(f"Could not send welcome email: {e}")
+        if SENDER_EMAIL and SENDER_PASSWORD:
+            try:
+                msg = MIMEMultipart('alternative')
+                msg['From'] = SENDER_EMAIL
+                msg['To'] = email
+                msg['Subject'] = "Welcome to AI News Digest! 🚀"
+                
+                html_content = f"""
+                <html>
+                <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 20px; color: white; text-align: center;">
+                        <h1>Welcome to AI News Digest! 🚀</h1>
+                        <p>Hi {name},</p>
+                        <p>Thank you for subscribing to our {digest_type.title()} digest!</p>
+                        <p>You'll receive your personalized news digest daily at 8:00 PM.</p>
+                        <p>Your preferences: {preferences}</p>
+                        <hr style="margin: 30px 0; border: 1px solid rgba(255,255,255,0.3);">
+                        <p style="font-size: 14px; opacity: 0.8;">
+                            You can unsubscribe anytime by replying to any digest email.
+                        </p>
+                    </div>
+                </body>
+                </html>
+                """
+                
+                msg.attach(MIMEText(html_content, 'html'))
+                
+                with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                    server.starttls()
+                    server.login(SENDER_EMAIL, SENDER_PASSWORD)
+                    server.send_message(msg)
+                
+                await supabase_client.log_email(email, "welcome", "Welcome to AI News Digest! 🚀", "sent")
+            except Exception as e:
+                logger.warning(f"Could not send welcome email: {e}")
+                await supabase_client.log_email(email, "welcome", "Welcome to AI News Digest! 🚀", "failed", str(e))
         
-        return db_subscriber
+        return RedirectResponse(url="/?subscribed=true", status_code=303)
+        
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Subscription error: {e}")
         raise HTTPException(status_code=500, detail="Subscription service error")
 
+@app.get("/contact", response_class=HTMLResponse)
+async def contact_page(request: Request):
+    """Contact page with beautiful template."""
+    return templates.TemplateResponse("contact.html", {"request": request})
+
 @app.post("/contact")
-async def submit_contact(contact: ContactForm, db = Depends(get_db)):
+async def submit_contact(
+    name: str = Form(...),
+    email: str = Form(...),
+    subject: str = Form(...),
+    message: str = Form(...)
+):
     """Handle contact form submission."""
     try:
-        logger.info(f"📧 Contact form submitted by {contact.email}")
+        logger.info(f"📧 Contact form submitted by {email}")
         
-        # Try to save to database if available
-        if DATABASE_AVAILABLE and db:
-            try:
-                import database.models as models
-                contact_message = models.ContactMessage(
-                    name=contact.name,
-                    email=contact.email,
-                    subject=contact.subject,
-                    message=contact.message
-                )
-                db.add(contact_message)
-                db.commit()
-                logger.info("✅ Contact message saved to database")
-            except Exception as e:
-                logger.error(f"❌ Database save error: {e}")
+        # Save to database
+        if DATABASE_AVAILABLE:
+            await supabase_client.add_contact_message(name, email, subject, message)
         
-        # Try to send email if configured
+        # Send email notification
         if SENDER_EMAIL and SENDER_PASSWORD:
             try:
-                msg = MIMEText(f"From: {contact.name} ({contact.email})\nSubject: {contact.subject}\n\nMessage:\n{contact.message}")
+                msg = MIMEText(f"From: {name} ({email})\nSubject: {subject}\n\nMessage:\n{message}")
                 msg['From'] = SENDER_EMAIL
                 msg['To'] = "contact.ainewsdigest@gmail.com"
-                msg['Subject'] = f"Contact Form: {contact.subject}"
+                msg['Subject'] = f"Contact Form: {subject}"
                 
                 with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
                     server.starttls()
@@ -632,158 +339,32 @@ async def submit_contact(contact: ContactForm, db = Depends(get_db)):
             except Exception as e:
                 logger.error(f"❌ Email send error: {e}")
         
-        return {"message": "Thank you for your message! We'll get back to you soon. 😊"}
+        return RedirectResponse(url="/contact?sent=true", status_code=303)
         
     except Exception as e:
         logger.error(f"Contact form error: {e}")
-        return {"message": "Thank you for your message. It has been received! 👍"}
+        return RedirectResponse(url="/contact?error=true", status_code=303)
 
 # Admin routes
 @app.get("/admin/login", response_class=HTMLResponse)
-async def admin_login():
-    return HTMLResponse("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>🔐 Admin Login - AI News Digest</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            body { font-family: 'Segoe UI', sans-serif; max-width: 400px; margin: 100px auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; }
-            .login-container { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); }
-            .form-group { margin: 20px 0; }
-            label { display: block; margin-bottom: 8px; font-weight: bold; }
-            input { width: 100%; padding: 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.9); color: #333; }
-            button { width: 100%; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 20px; }
-        </style>
-    </head>
-    <body>
-        <div class="login-container">
-            <h2>🔐 Admin Login</h2>
-            <form method="post" action="/api/admin/login">
-                <div class="form-group">
-                    <label for="api_key">Admin API Key:</label>
-                    <input type="password" id="api_key" name="api_key" required>
-                </div>
-                <button type="submit">🚀 Login</button>
-            </form>
-            <p style="text-align: center; margin-top: 20px;">
-                <a href="/" style="color: white;">← Back to Home</a>
-            </p>
-        </div>
-    </body>
-    </html>
-    """)
+async def admin_login(request: Request):
+    """Admin login page with beautiful template."""
+    return templates.TemplateResponse("admin_login.html", {"request": request})
 
 @app.get("/admin/dashboard", response_class=HTMLResponse)
 async def admin_dashboard(request: Request, admin: bool = Depends(verify_admin_key)):
     """Admin dashboard with beautiful template."""
-    templates = get_templates()
-    if templates:
-        try:
-            return templates.TemplateResponse("admin_dashboard.html", {"request": request})
-        except Exception as e:
-            logger.error(f"Template render error: {e}")
-    
-    # Fallback admin dashboard
-    return HTMLResponse("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>📊 Admin Dashboard - AI News Digest</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white; padding: 20px; }
-            .dashboard { max-width: 1200px; margin: 0 auto; }
-            .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0; }
-            .stat-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); text-align: center; }
-            .stat-number { font-size: 2.5em; font-weight: bold; margin: 10px 0; color: #a8edea; }
-            .management-section { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); margin: 20px 0; }
-            .action-buttons { display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0; }
-            .btn { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-weight: bold; border: none; cursor: pointer; }
-            .btn:hover { transform: translateY(-2px); }
-        </style>
-    </head>
-    <body>
-        <div class="dashboard">
-            <h1>📊 AI News Digest Admin Dashboard</h1>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>👥 Total Subscribers</h3>
-                    <div class="stat-number" id="total-subscribers">Loading...</div>
-                </div>
-                <div class="stat-card">
-                    <h3>📧 Emails Sent Today</h3>
-                    <div class="stat-number" id="emails-today">Loading...</div>
-                </div>
-                <div class="stat-card">
-                    <h3>⚡ System Status</h3>
-                    <div class="stat-number" id="system-status">Loading...</div>
-                </div>
-            </div>
-            
-            <div class="management-section">
-                <h2>🛠️ Management Actions</h2>
-                <div class="action-buttons">
-                    <button class="btn" onclick="window.open('/health', '_blank')">🏥 System Health</button>
-                    <a href="/" class="btn">🏠 Back to Home</a>
-                </div>
-            </div>
-        </div>
-        
-        <script>
-            // Load dashboard data
-            async function loadDashboardData() {
-                try {
-                    const response = await fetch('/api/stats', {
-                        headers: { 'X-Admin-Key': new URLSearchParams(window.location.search).get('key') || localStorage.getItem('admin_key') }
-                    });
-                    const data = await response.json();
-                    
-                    document.getElementById('total-subscribers').textContent = data.total_subscribers || 0;
-                    document.getElementById('emails-today').textContent = data.emails_sent_today || 0;
-                    document.getElementById('system-status').textContent = data.status || 'Unknown';
-                } catch (error) {
-                    console.error('Error loading dashboard data:', error);
-                    document.getElementById('total-subscribers').textContent = 'Error';
-                    document.getElementById('emails-today').textContent = 'Error';
-                    document.getElementById('system-status').textContent = 'Error';
-                }
-            }
-            
-            // Load data on page load
-            loadDashboardData();
-        </script>
-    </body>
-    </html>
-    """)
+    return templates.TemplateResponse("admin_dashboard.html", {"request": request})
 
 @app.get("/api/stats")
 async def get_stats(request: Request, admin: bool = Depends(verify_admin_key)):
     """Get platform statistics."""
     try:
         if DATABASE_AVAILABLE:
-            import database.models as models
-            db = get_db_session()
-            if db:
-                total_subscribers = db.query(models.Subscriber).filter(models.Subscriber.is_active == True).count()
-                tech_subscribers = db.query(models.Subscriber).filter(
-                    models.Subscriber.is_active == True,
-                    models.Subscriber.digest_type.in_(["tech", "both"])
-                ).count()
-                upsc_subscribers = db.query(models.Subscriber).filter(
-                    models.Subscriber.is_active == True,
-                    models.Subscriber.digest_type.in_(["upsc", "both"])
-                ).count()
-                db.close()
-                return {
-                    "total_subscribers": total_subscribers,
-                    "tech_subscribers": tech_subscribers,
-                    "upsc_subscribers": upsc_subscribers,
-                    "emails_sent_today": 0,  # TODO: Implement email tracking
-                    "status": "operational"
-                }
+            stats = await supabase_client.get_subscriber_stats()
+            stats["emails_sent_today"] = 0  # TODO: Implement from email_logs
+            stats["status"] = "operational"
+            return stats
         
         return {
             "total_subscribers": 0,
@@ -813,50 +394,52 @@ async def admin_login_api(request: Request, api_key: str = Form(...)):
         attempts_left = MAX_ATTEMPTS - len(failed_attempts[client_ip])
         if attempts_left <= 0:
             raise HTTPException(status_code=429, detail="Account locked. Too many failed attempts.")
-        raise HTTPException(
-            status_code=401, 
-            detail=f"Invalid admin key. {attempts_left} attempts remaining."
-        )
+        return RedirectResponse(url="/admin/login?error=invalid", status_code=303)
     
     if client_ip in failed_attempts:
         del failed_attempts[client_ip]
     
-    return {"message": "Login successful", "redirect": "/admin/dashboard"}
+    # Set admin key in session (simplified for demo)
+    response = RedirectResponse(url="/admin/dashboard", status_code=303)
+    response.set_cookie("admin_session", api_key, httponly=True, secure=True)
+    return response
 
 @app.post("/api/generate-unsubscribe-token")
-async def generate_unsubscribe_token_api(request: UnsubscribeTokenRequest, db = Depends(get_db)):
+async def generate_unsubscribe_token_api(request: UnsubscribeTokenRequest):
     """Generate unsubscribe token for a given email."""
-    if not DATABASE_AVAILABLE or not db:
+    if not DATABASE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Database service unavailable")
     
-    import database.models as models
-    subscriber = db.query(models.Subscriber).filter(models.Subscriber.email == request.email).first()
-    if not subscriber:
-        raise HTTPException(status_code=404, detail="Email not found in our records")
+    subscribers = await supabase_client.get_subscribers()
+    subscriber_emails = [s['email'] for s in subscribers]
     
-    if not subscriber.is_active:
-        raise HTTPException(status_code=400, detail="This email is already unsubscribed")
+    if request.email not in subscriber_emails:
+        raise HTTPException(status_code=404, detail="Email not found in our records")
     
     token = generate_unsubscribe_token(request.email)
     return {"token": token}
 
-# Mangum handler for Vercel serverless deployment
-def create_handler():
-    """Create the ASGI handler for Vercel deployment."""
-    try:
-        from mangum import Mangum
-        return Mangum(app)
-    except ImportError:
-        logger.info("Mangum not available - using direct app")
-        return app
-    except Exception as e:
-        logger.error(f"Mangum initialization failed: {e} - using direct app")
-        return app
+@app.get("/unsubscribe")
+async def unsubscribe_page(request: Request, email: str = Query(...), token: str = Query(...)):
+    """Unsubscribe page."""
+    if not verify_unsubscribe_token(email, token):
+        raise HTTPException(status_code=400, detail="Invalid unsubscribe link")
+    
+    success = await supabase_client.unsubscribe_user(email)
+    return templates.TemplateResponse("unsubscribe.html", {
+        "request": request, 
+        "email": email, 
+        "success": success
+    })
 
-# Create handler for Vercel
-handler = create_handler()
-
-logger.info("🎉 Handler and app export initialized for deployment")
+# Mangum handler for Vercel
+try:
+    from mangum import Mangum
+    handler = Mangum(app)
+    logger.info("✅ Mangum handler created for Vercel deployment")
+except ImportError:
+    logger.info("⚠️ Mangum not available - using direct app")
+    handler = app
 
 if __name__ == "__main__":
     import uvicorn
