@@ -21,8 +21,6 @@ from fastapi import FastAPI, Depends, HTTPException, Request, Form, Query, Backg
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr, validator
 from datetime import datetime
@@ -38,8 +36,10 @@ import re
 import time
 from collections import defaultdict
 
-# Try to import database models - handle gracefully if they fail
+# Try to import SQLAlchemy and database models - handle gracefully if they fail
 try:
+    from sqlalchemy.orm import Session
+    from sqlalchemy import create_engine
     import database.models as models
     from database.models import Base
     from database.database import get_db, create_tables, init_database
