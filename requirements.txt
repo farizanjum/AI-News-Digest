@@ -21,4 +21,4 @@ asyncpg==0.29.0
 
 # Additional dependencies for production
 gunicorn==21.2.0
-mangum==0.18.0
+mangum==0.15.1

@@ -352,24 +352,27 @@ async def get_stats(admin: bool = Depends(verify_admin_key)):
         logger.error(f"Stats error: {e}")
         return {"error": str(e), "total_subscribers": 0}
 
-# Add Mangum handler for Vercel
-try:
-    from mangum import Mangum  # type: ignore
-    handler = Mangum(app, lifespan="off")
-    logger.info("Mangum handler initialized for Vercel deployment")
-except ImportError:
-    logger.info("Running in development mode")
-    pass
-except Exception as e:
-    logger.warning(f"Mangum initialization issue: {e}")
-    # Fallback handler
+# Mangum handler for Vercel serverless deployment
+def create_handler():
+    """Create the ASGI handler for Vercel deployment."""
     try:
-        from mangum import Mangum  # type: ignore
-        handler = Mangum(app)
-        logger.info("Mangum handler initialized with default settings")
-    except:
-        logger.error("Could not initialize Mangum handler")
-        pass
+        from mangum import Mangum
+        # Use the most basic Mangum configuration
+        return Mangum(app)
+    except ImportError:
+        logger.info("Mangum not available - using direct app")
+        return app
+    except Exception as e:
+        logger.error(f"Mangum initialization failed: {e} - using direct app")
+        return app
+
+# Create handler for Vercel
+handler = create_handler()
+
+# Also create a direct app export as fallback
+app_export = app
+
+logger.info("Handler and app export initialized for deployment")
 
 if __name__ == "__main__":
     import uvicorn
